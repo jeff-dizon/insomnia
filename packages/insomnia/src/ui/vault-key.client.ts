@@ -3,7 +3,7 @@ import * as srp from '@getinsomnia/srp-js';
 import { userSession as sessionModel } from '../models';
 import type { UserSession } from '../models/user-session';
 import { base64encode, saveVaultKeyIfNecessary } from '../utils/vault';
-import { insomniaFetch } from './insomniaFetch';
+import { customFetch } from './customFetch';
 
 const { Buffer, Client, generateAES256Key, getRandomHex, params, srpGenKey } = srp;
 interface FetchError {
@@ -15,7 +15,7 @@ export const vaultKeyParams = params[2048];
 const vaultKeyRequestBathPath = '/v1/user/vault';
 
 const createVaultKeyRequest = async (sessionId: string, salt: string, verifier: string) =>
-  insomniaFetch<FetchError>({
+  customFetch<FetchError>({
     method: 'POST',
     path: vaultKeyRequestBathPath,
     data: { salt, verifier },
@@ -25,7 +25,7 @@ const createVaultKeyRequest = async (sessionId: string, salt: string, verifier: 
   });
 
 const resetVaultKeyRequest = async (sessionId: string, salt: string, verifier: string) =>
-  insomniaFetch<FetchError>({
+  customFetch<FetchError>({
     method: 'POST',
     path: `${vaultKeyRequestBathPath}/reset`,
     sessionId,
@@ -102,7 +102,7 @@ export const validateVaultKey = async (session: UserSession, vaultKey: string, v
     sessionStarterId,
     srpB,
     error: verifyAError,
-  } = await insomniaFetch<{
+  } = await customFetch<{
     sessionStarterId: string;
     srpB: string;
     error?: string;
@@ -118,7 +118,7 @@ export const validateVaultKey = async (session: UserSession, vaultKey: string, v
   // ~~~~~~~~~~~~~~~~~~~~~ //
   srpClient.setB(Buffer.from(srpB, 'hex'));
   const srpM1 = srpClient.computeM1().toString('hex');
-  const { srpM2, error: verifyM1Error } = await insomniaFetch<{
+  const { srpM2, error: verifyM1Error } = await customFetch<{
     srpM2: string;
     error?: string;
     message?: string;

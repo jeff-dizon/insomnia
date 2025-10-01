@@ -12,7 +12,7 @@ import { getCurrentSessionId } from '../../account/session';
 import type { Operation } from '../../common/database';
 import { generateId } from '../../common/misc';
 import type { BaseModel } from '../../models';
-import { insomniaFetch } from '../../ui/insomniaFetch';
+import { customFetch } from '../../ui/customFetch';
 import Store from '../store';
 import type { BaseDriver } from '../store/drivers/base';
 import compress from '../store/hooks/compress';
@@ -120,7 +120,7 @@ export class VCS {
 
   async archiveProject() {
     const backendProjectId = this._backendProjectId();
-    await insomniaFetch({
+    await customFetch({
       method: 'POST',
       path: `/v1/workspaces/${backendProjectId}/archive`,
       sessionId: await getCurrentSessionId(),
@@ -162,7 +162,7 @@ export class VCS {
     teamId && queryParams.set('organizationId', teamId);
     teamProjectId && queryParams.set('projectId', teamProjectId);
 
-    const projects = await insomniaFetch<BackendProjectWithTeam[]>({
+    const projects = await customFetch<BackendProjectWithTeam[]>({
       method: 'GET',
       path: `/v1/workspaces?${queryParams.toString()}`,
       sessionId: await getCurrentSessionId(),
@@ -336,7 +336,7 @@ export class VCS {
       throw new Error('Cannot delete master branch');
     }
 
-    await insomniaFetch({
+    await customFetch({
       path: `/v1/workspaces/${this._backendProjectId()}/branches/${branchName}`,
       method: 'DELETE',
       sessionId: await getCurrentSessionId(),
@@ -497,7 +497,7 @@ export class VCS {
   }
 
   async getRemoteBranchNames(): Promise<string[]> {
-    const branches = await insomniaFetch<Branch[]>({
+    const branches = await customFetch<Branch[]>({
       method: 'GET',
       path: '/v1/workspaces/' + this._backendProjectId() + '/branches',
       sessionId: await getCurrentSessionId(),
@@ -724,7 +724,7 @@ export class VCS {
   }
 
   async _querySnapshots(ids: string[]) {
-    const snapshots = await insomniaFetch<Snapshot[]>({
+    const snapshots = await customFetch<Snapshot[]>({
       method: 'POST',
       path: '/snapshots',
       data: ids,
@@ -852,7 +852,7 @@ export class VCS {
   }
 
   async _queryBlobsMissing(ids: string[]): Promise<string[]> {
-    const blobsMissing = await insomniaFetch<{ missingBlobIds: string[] }>({
+    const blobsMissing = await customFetch<{ missingBlobIds: string[] }>({
       method: 'POST',
       path: '/v1/blobs/missing-blobs',
       sessionId: await getCurrentSessionId(),
@@ -865,7 +865,7 @@ export class VCS {
   }
 
   async _queryBranch(branchName: string): Promise<Branch | null> {
-    const branch = await insomniaFetch<Branch | null>({
+    const branch = await customFetch<Branch | null>({
       method: 'GET',
       path: `/v1/workspaces/${this._backendProjectId()}/branches/${branchName}`,
       sessionId: await getCurrentSessionId(),
@@ -901,7 +901,7 @@ export class VCS {
           state: s.state,
         })),
       };
-      const snapshotsCreate = await insomniaFetch<Snapshot[]>({
+      const snapshotsCreate = await customFetch<Snapshot[]>({
         method: 'POST',
         path: `/v1/snapshots/create`,
         sessionId: await getCurrentSessionId(),
@@ -918,7 +918,7 @@ export class VCS {
     const result: Record<string, Buffer> = {};
 
     for (const ids of chunkArray(allIds, 50)) {
-      const blobs = await insomniaFetch<{ id: string; content: string }[]>({
+      const blobs = await customFetch<{ id: string; content: string }[]>({
         method: 'POST',
         path: `/v1/workspaces/${this._backendProjectId()}/blobs`,
         sessionId: await getCurrentSessionId(),
@@ -949,7 +949,7 @@ export class VCS {
         content: i.content,
       }));
 
-      const result = await insomniaFetch<number>({
+      const result = await customFetch<number>({
         method: 'POST',
         path: '/v1/blobs/create',
         sessionId: await getCurrentSessionId(),
@@ -997,7 +997,7 @@ export class VCS {
   }
 
   async _queryProject(): Promise<BackendProject | null> {
-    const project = await insomniaFetch<BackendProject | null>({
+    const project = await customFetch<BackendProject | null>({
       method: 'GET',
       path: `/v1/workspaces/${this._backendProjectId()}`,
       sessionId: await getCurrentSessionId(),
@@ -1011,7 +1011,7 @@ export class VCS {
       throw new Error('teamId must not be null or empty!');
     }
 
-    const projectCreate = await insomniaFetch<BackendProject>({
+    const projectCreate = await customFetch<BackendProject>({
       method: 'POST',
       path: `/v1/workspaces`,
       data: {

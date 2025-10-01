@@ -8,7 +8,7 @@ import type { GitCredentials } from '~/models/git-repository';
 import { EMPTY_GIT_PROJECT_ID } from '~/models/project';
 import type { WorkspaceMeta } from '~/models/workspace-meta';
 import { SegmentEvent } from '~/ui/analytics';
-import { insomniaFetch } from '~/ui/insomniaFetch';
+import { customFetch } from '~/ui/customFetch';
 import { invariant } from '~/utils/invariant';
 import { createFetcherSubmitHook } from '~/utils/router';
 
@@ -46,7 +46,7 @@ export async function clientAction({ request, params }: Route.ClientActionArgs) 
     await projectLock.lock();
     // If its a cloud project, and we are renaming, then patch
     if (sessionId && project.remoteId && storageType === 'remote' && name !== project.name) {
-      const response = await insomniaFetch<void | {
+      const response = await customFetch<void | {
         error: string;
         message?: string;
       }>({
@@ -85,7 +85,7 @@ export async function clientAction({ request, params }: Route.ClientActionArgs) 
 
     // convert from cloud to local
     if (storageType === 'local' && project.remoteId) {
-      const response = await insomniaFetch<void | {
+      const response = await customFetch<void | {
         error: string;
         message?: string;
       }>({
@@ -126,7 +126,7 @@ export async function clientAction({ request, params }: Route.ClientActionArgs) 
     }
     // convert from local/git to cloud
     if (storageType === 'remote' && !project.remoteId) {
-      const newCloudProject = await insomniaFetch<
+      const newCloudProject = await customFetch<
         | {
             id: string;
             name: string;
@@ -187,7 +187,7 @@ export async function clientAction({ request, params }: Route.ClientActionArgs) 
     // convert to git
     if (storageType === 'git' && !project.gitRepositoryId) {
       if (project.remoteId) {
-        const response = await insomniaFetch<void | {
+        const response = await customFetch<void | {
           error: string;
           message?: string;
         }>({

@@ -3,7 +3,7 @@ import { href, redirect } from 'react-router';
 import { database } from '~/common/database';
 import { projectLock } from '~/common/project';
 import * as models from '~/models';
-import { insomniaFetch } from '~/ui/insomniaFetch';
+import { customFetch } from '~/ui/customFetch';
 import { invariant } from '~/utils/invariant';
 import { createFetcherSubmitHook, getInitialRouteForOrganization } from '~/utils/router';
 
@@ -24,7 +24,7 @@ export async function clientAction({ params }: Route.ClientActionArgs) {
     await projectLock.lock();
     const bufferId = await database.bufferChanges();
     if (project.remoteId) {
-      const response = await insomniaFetch<void | {
+      const response = await customFetch<void | {
         error: string;
         message?: string;
       }>({

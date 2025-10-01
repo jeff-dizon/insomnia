@@ -4,7 +4,7 @@ import { href } from 'react-router';
 import { userSession as sessionModel } from '~/models';
 import { removeAllSecrets } from '~/models/environment';
 import type { ToastNotification } from '~/ui/components/toast';
-import { insomniaFetch } from '~/ui/insomniaFetch';
+import { customFetch } from '~/ui/customFetch';
 import { createFetcherSubmitHook } from '~/utils/router';
 
 import type { Route } from './+types/auth.clear-vault-key';
@@ -15,7 +15,7 @@ export async function clientAction({ request }: Route.ClientActionArgs) {
   const userSession = await sessionModel.getOrCreate();
   const { id: sessionId } = userSession;
   const { salt: newVaultSalt } =
-    (await insomniaFetch<{
+    (await customFetch<{
       salt?: string;
       error?: string;
     }>({

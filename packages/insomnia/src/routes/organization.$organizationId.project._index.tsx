@@ -80,7 +80,7 @@ import { TimeFromNow } from '~/ui/components/time-from-now';
 import { useInsomniaEventStreamContext } from '~/ui/context/app/insomnia-event-stream-context';
 import { useLoaderDeferData } from '~/ui/hooks/use-loader-defer-data';
 import { useOrganizationPermissions } from '~/ui/hooks/use-organization-features';
-import { insomniaFetch } from '~/ui/insomniaFetch';
+import { customFetch } from '~/ui/customFetch';
 import { DEFAULT_STORAGE_RULES } from '~/ui/organization-utils';
 import { invariant } from '~/utils/invariant';
 
@@ -331,7 +331,7 @@ const getLearningFeature = async (fallbackLearningFeature: LearningFeature) => {
   const wasNotDismissedAndOneDayHasPassed = !wasDismissed && hasOneDayPassedSinceLastFetch;
   if (wasNotDismissedAndOneDayHasPassed) {
     try {
-      learningFeature = await insomniaFetch<LearningFeature>({
+      learningFeature = await customFetch<LearningFeature>({
         method: 'GET',
         path: '/insomnia-production-public-assets/inapp-learning.json',
         origin: 'https://storage.googleapis.com',

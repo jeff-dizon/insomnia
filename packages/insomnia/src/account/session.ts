@@ -1,5 +1,5 @@
 import { userSession } from '../models';
-import { insomniaFetch } from '../ui/insomniaFetch';
+import { customFetch } from '../ui/customFetch';
 import * as crypt from './crypt';
 
 type LoginCallback = (isLoggedIn: boolean) => void;
@@ -104,7 +104,7 @@ export async function logout() {
   const sessionId = await getCurrentSessionId();
   if (sessionId) {
     try {
-      insomniaFetch({
+      customFetch({
         method: 'POST',
         path: '/auth/logout',
         sessionId,
@@ -159,7 +159,7 @@ export async function setVaultSessionData(vaultSalt: string, vaultKey: string) {
 // ~~~~~~~~~~~~~~~~ //
 
 async function _whoami(sessionId: string | null = null): Promise<WhoamiResponse> {
-  const response = await insomniaFetch<WhoamiResponse | string>({
+  const response = await customFetch<WhoamiResponse | string>({
     method: 'GET',
     path: '/auth/whoami',
     sessionId: sessionId || (await getCurrentSessionId()),

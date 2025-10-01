@@ -1,7 +1,7 @@
 import { decryptRSAWithJWK, encryptRSAWithJWK } from '../../../../account/crypt';
 import { getCurrentSessionId, getPrivateKey } from '../../../../account/session';
 import { invariant } from '../../../../utils/invariant';
-import { insomniaFetch } from '../../../insomniaFetch';
+import { customFetch } from '../../../customFetch';
 
 interface InviteInstruction {
   inviteKeys: InviteKey[];
@@ -138,7 +138,7 @@ export async function startInvite({ emails, teamIds, organizationId, roleId }: S
 
   // we are merging these endpoints into one as it has grown onto several types over time.
   // this way, we can also offload the complex logic to the API
-  const instruction = await insomniaFetch<CollaboratorInstruction>({
+  const instruction = await customFetch<CollaboratorInstruction>({
     method: 'POST',
     path: `/v1/desktop/organizations/${organizationId}/collaborators/start-adding`,
     data: { teamIds, emails },
@@ -146,7 +146,7 @@ export async function startInvite({ emails, teamIds, organizationId, roleId }: S
     onlyResolveOnSuccess: true,
   });
 
-  const myKeysInfo = await insomniaFetch<ResponseGetMyProjectKeys>({
+  const myKeysInfo = await customFetch<ResponseGetMyProjectKeys>({
     method: 'GET',
     path: `/v1/organizations/${organizationId}/my-project-keys`,
     sessionId,
@@ -172,7 +172,7 @@ export async function startInvite({ emails, teamIds, organizationId, roleId }: S
   }
 
   if (memberKeys.length) {
-    await insomniaFetch({
+    await customFetch({
       method: 'POST',
       path: `/v1/organizations/${organizationId}/reconcile-keys`,
       sessionId,
@@ -207,7 +207,7 @@ export async function startInvite({ emails, teamIds, organizationId, roleId }: S
     }
   }
 
-  await insomniaFetch({
+  await customFetch({
     method: 'POST',
     path: `/v1/desktop/organizations/${organizationId}/collaborators/finish-adding`,
     data: { teamIds, keys, accountIds, roleId },

@@ -1,7 +1,7 @@
 import { href } from 'react-router';
 
 import * as models from '~/models';
-import { insomniaFetch } from '~/ui/insomniaFetch';
+import { customFetch } from '~/ui/customFetch';
 import { invariant } from '~/utils/invariant';
 import { createFetcherSubmitHook } from '~/utils/router';
 
@@ -19,7 +19,7 @@ export async function clientAction({ request, params }: Route.ClientActionArgs) 
     const user = await models.userSession.getOrCreate();
     const sessionId = user.id;
 
-    const response = await insomniaFetch<{ enabled: boolean }>({
+    const response = await customFetch<{ enabled: boolean }>({
       method: 'PATCH',
       path: `/v1/organizations/${organizationId}/invites/${invitationId}`,
       data: { roles: [roleId] },

@@ -24,7 +24,7 @@ export class ResponseFailError extends Error {
 }
 
 // Adds headers, retries and opens deep links returned from the api
-export async function insomniaFetch<T = void>({
+export async function customFetch<T = void>({
   method,
   path,
   data,

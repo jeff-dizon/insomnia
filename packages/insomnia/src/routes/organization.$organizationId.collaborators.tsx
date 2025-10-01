@@ -1,7 +1,7 @@
 import { href } from 'react-router';
 
 import { userSession } from '~/models';
-import { insomniaFetch } from '~/ui/insomniaFetch';
+import { customFetch } from '~/ui/customFetch';
 import { createFetcherLoadHook } from '~/utils/router';
 
 import type { Route } from './+types/organization.$organizationId.collaborators';
@@ -62,7 +62,7 @@ export async function clientLoader({ params, request }: Route.ClientLoaderArgs) 
       path += `&filter=${searchParams.filter}`;
     }
 
-    const collaboratorsList = await insomniaFetch<CollaboratorsListResult>({
+    const collaboratorsList = await customFetch<CollaboratorsListResult>({
       method: 'GET',
       path,
       sessionId,

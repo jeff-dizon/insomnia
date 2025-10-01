@@ -4,7 +4,7 @@ import { database } from '~/common/database';
 import { project, userSession } from '~/models';
 import { type Organization } from '~/models/organization';
 import { type Project } from '~/models/project';
-import { insomniaFetch } from '~/ui/insomniaFetch';
+import { customFetch } from '~/ui/customFetch';
 import { createFetcherLoadHook } from '~/utils/router';
 
 import type { Route } from './+types/remote-files';
@@ -42,7 +42,7 @@ export async function clientLoader(_args: Route.ClientLoaderArgs) {
   }
 
   try {
-    const remoteFiles = await insomniaFetch<RemoteFile[]>({
+    const remoteFiles = await customFetch<RemoteFile[]>({
       method: 'GET',
       path: '/v1/user/files',
       sessionId,

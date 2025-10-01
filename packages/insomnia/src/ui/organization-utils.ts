@@ -17,7 +17,7 @@ import {
   migrateProjectsIntoOrganization,
   shouldMigrateProjectUnderOrganization,
 } from '../sync/vcs/migrate-projects-into-organization';
-import { insomniaFetch } from '../ui/insomniaFetch';
+import { customFetch } from './customFetch';
 import { invariant } from '../utils/invariant';
 
 // Create an in-memory storage to store the storage rules
@@ -57,12 +57,12 @@ export function sortOrganizations(accountId: string, organizations: Organization
 export async function syncOrganizations(sessionId: string, accountId: string) {
   try {
     const [organizationsResult, user] = await Promise.all([
-      insomniaFetch<OrganizationsResponse | void>({
+      customFetch<OrganizationsResponse | void>({
         method: 'GET',
         path: '/v1/organizations',
         sessionId,
       }),
-      insomniaFetch<UserProfileResponse | void>({
+      customFetch<UserProfileResponse | void>({
         method: 'GET',
         path: '/v1/user/profile',
         sessionId,
@@ -164,7 +164,7 @@ async function getAllTeamProjects(organizationId: string) {
   }
 
   console.log('[project] Fetching', organizationId);
-  const response = await insomniaFetch<TeamProject[]>({
+  const response = await customFetch<TeamProject[]>({
     path: `/v1/organizations/${organizationId}/team-projects`,
     method: 'GET',
     sessionId,

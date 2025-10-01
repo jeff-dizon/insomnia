@@ -1,7 +1,7 @@
 import { href } from 'react-router';
 
 import { userSession } from '~/models';
-import { insomniaFetch } from '~/ui/insomniaFetch';
+import { customFetch } from '~/ui/customFetch';
 import { createFetcherLoadHook } from '~/utils/router';
 
 import type { Route } from './+types/organization.$organizationId.collaborators-search';
@@ -24,7 +24,7 @@ export async function clientLoader({ params, request }: Route.ClientLoaderArgs) 
     const requestUrl = new URL(request.url);
     const searchParams = Object.fromEntries(requestUrl.searchParams.entries());
 
-    const collaboratorsSearchList = await insomniaFetch<CollaboratorSearchResultItem[]>({
+    const collaboratorsSearchList = await customFetch<CollaboratorSearchResultItem[]>({
       method: 'GET',
       path: `/v1/desktop/organizations/${organizationId}/collaborators/search/${searchParams.query}`,
       sessionId,

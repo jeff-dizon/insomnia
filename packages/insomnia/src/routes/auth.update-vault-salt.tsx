@@ -1,13 +1,13 @@
 import { type ActionFunctionArgs, href } from 'react-router';
 
 import { userSession as sessionModel } from '~/models';
-import { insomniaFetch } from '~/ui/insomniaFetch';
+import { customFetch } from '~/ui/customFetch';
 import { createFetcherSubmitHook } from '~/utils/router';
 
 export async function clientAction(_args: ActionFunctionArgs) {
   const userSession = await sessionModel.getOrCreate();
   const { id: sessionId } = userSession;
-  const { salt: vaultSalt } = await insomniaFetch<{
+  const { salt: vaultSalt } = await customFetch<{
     salt?: string;
     error?: string;
   }>({

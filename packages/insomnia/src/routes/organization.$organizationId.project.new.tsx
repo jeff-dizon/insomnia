@@ -5,7 +5,7 @@ import * as models from '~/models';
 import type { GitCredentials, OauthProviderName } from '~/models/git-repository';
 import { EMPTY_GIT_PROJECT_ID } from '~/models/project';
 import { SegmentEvent } from '~/ui/analytics';
-import { insomniaFetch } from '~/ui/insomniaFetch';
+import { customFetch } from '~/ui/customFetch';
 import { invariant } from '~/utils/invariant';
 import { createFetcherSubmitHook } from '~/utils/router';
 
@@ -95,7 +95,7 @@ export const createProject = async (organizationId: string, newProjectData: Crea
       return projectId;
     }
 
-    const newCloudProject = await insomniaFetch<
+    const newCloudProject = await customFetch<
       | {
           id: string;
           name: string;

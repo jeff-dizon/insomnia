@@ -24,7 +24,7 @@ import type { MockRoute } from '../../../models/mock-route';
 import type { MockServer } from '../../../models/mock-server';
 import type { Response } from '../../../models/response';
 import { cancelRequestById } from '../../../network/cancellation';
-import { insomniaFetch } from '../../../ui/insomniaFetch';
+import { customFetch } from '../../customFetch';
 import { jsonPrettify } from '../../../utils/prettify/json';
 import { useExecutionState } from '../../hooks/use-execution-state';
 import { Dropdown, DropdownItem, DropdownSection, ItemContent } from '../base/dropdown';
@@ -189,7 +189,7 @@ const HistoryViewWrapperComponentFactory = ({
     const compoundId = mockRoute.parentId + mockRoute.name;
     const mockbinUrl = mockServer.useInsomniaCloud ? getMockServiceURL() : mockServer.url;
     try {
-      const res = await insomniaFetch<MockbinLogOutput>({
+      const res = await customFetch<MockbinLogOutput>({
         origin: mockbinUrl,
         path: `/bin/log/${compoundId}`,
         method: 'GET',

@@ -26,7 +26,7 @@ import { PromptButton } from '~/ui/components/base/prompt-button';
 import { Icon } from '~/ui/components/icon';
 import { AlertModal } from '~/ui/components/modals/alert-modal';
 import { showModal } from '~/ui/components/modals/index';
-import { insomniaFetch } from '~/ui/insomniaFetch';
+import { customFetch } from '~/ui/customFetch';
 import { invariant } from '~/utils/invariant';
 
 import { InviteForm } from './invite-form';
@@ -654,7 +654,7 @@ export type Permission =
   | 'leave:organization';
 
 export async function getCurrentUserPermissionsInOrg(organizationId: string): Promise<Record<Permission, boolean>> {
-  return insomniaFetch({
+  return customFetch({
     method: 'GET',
     path: `/v1/organizations/${organizationId}/user-permissions`,
     sessionId: await getCurrentSessionId(),
@@ -699,7 +699,7 @@ async function getOrganizationFeatures(organizationId: string): Promise<Features
 
 /** Get all roles */
 export async function getAllRoles(): Promise<Role[]> {
-  return insomniaFetch<Role[]>({
+  return customFetch<Role[]>({
     method: 'GET',
     path: '/v1/organizations/roles',
     sessionId: await getCurrentSessionId(),
@@ -711,7 +711,7 @@ export async function getAllRoles(): Promise<Role[]> {
 
 /** Get current user's role in an organization */
 export async function getCurrentUserRoleInOrg(organizationId: string): Promise<Role> {
-  return insomniaFetch<Role>({
+  return customFetch<Role>({
     method: 'GET',
     path: `/v1/organizations/${organizationId}/members/${await getAccountId()}/roles`,
     sessionId: await getCurrentSessionId(),
@@ -743,7 +743,7 @@ export interface OrganizationAuth0 {
 }
 
 async function getOrganization(organizationId: string): Promise<OrganizationAuth0> {
-  return insomniaFetch<OrganizationAuth0>({
+  return customFetch<OrganizationAuth0>({
     method: 'GET',
     path: `/v1/organizations/${organizationId}`,
     sessionId: await getCurrentSessionId(),
@@ -754,7 +754,7 @@ async function getOrganization(organizationId: string): Promise<OrganizationAuth
 }
 
 async function deleteMember(organizationId: string, userId: string) {
-  return insomniaFetch<void>({
+  return customFetch<void>({
     method: 'DELETE',
     path: `/v1/organizations/${organizationId}/members/${userId}`,
     sessionId: await getCurrentSessionId(),
@@ -765,7 +765,7 @@ async function deleteMember(organizationId: string, userId: string) {
 }
 
 async function unlinkTeam(organizationId: string, collaboratorId: string) {
-  return insomniaFetch<void>({
+  return customFetch<void>({
     method: 'DELETE',
     path: `/v1/desktop/organizations/${organizationId}/collaborators/${collaboratorId}/unlink`,
     sessionId: await getCurrentSessionId(),
@@ -776,7 +776,7 @@ async function unlinkTeam(organizationId: string, collaboratorId: string) {
 }
 
 async function revokeOrganizationInvite(organizationId: string, invitationId: string) {
-  return insomniaFetch<void>({
+  return customFetch<void>({
     method: 'DELETE',
     path: `/v1/organizations/${organizationId}/invites/${invitationId}`,
     sessionId: await getCurrentSessionId(),
