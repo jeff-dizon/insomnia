@@ -10,6 +10,7 @@ import type { Route } from './+types/organization.$organizationId.project.$proje
 
 export async function clientLoader({ params }: Route.ClientLoaderArgs) {
   const { projectId, workspaceId } = params;
+
   try {
     const project = await models.project.getById(projectId);
     invariant(project, 'Project not found');

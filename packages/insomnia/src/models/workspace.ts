@@ -68,7 +68,6 @@ export function findByParentId(parentId: string) {
 }
 
 export async function create(patch: Partial<Workspace> = {}) {
-  expectParentToBeProject(patch.parentId);
   return db.docCreate<Workspace>(type, patch);
 }
 

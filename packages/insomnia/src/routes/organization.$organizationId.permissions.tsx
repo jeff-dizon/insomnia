@@ -40,23 +40,23 @@ export async function clientLoader({ params }: Route.ClientLoaderArgs) {
     throw redirect(href('/organization'));
   }
 
-  try {
-    const featuresResponse = insomniaFetch<{ features: FeatureList; billing: Billing } | undefined>({
-      method: 'GET',
-      path: `/v1/organizations/${organizationId}/features`,
-      sessionId,
-    });
+  const features: FeatureList = {
+    bulkImport: { enabled: true },
+    gitSync: { enabled: false },
+    orgBasicRbac: { enabled: true },
+  };
 
-    return {
-      featuresPromise: featuresResponse.then(res => res?.features || fallbackFeatures),
-      billingPromise: featuresResponse.then(res => res?.billing || fallbackBilling),
-    };
-  } catch {
-    return {
-      featuresPromise: Promise.resolve(fallbackFeatures),
-      billingPromise: Promise.resolve(fallbackBilling),
-    };
-  }
+  const billing: Billing = {
+    isActive: true,
+    expirationWarningMessage: '',
+    expirationErrorMessage: '',
+    accessDenied: false,
+  };
+
+  return {
+    featuresPromise: Promise.resolve(features),
+    billingPromise: Promise.resolve(billing),
+  };
 }
 
 export function shouldRevalidate(args: ShouldRevalidateFunctionArgs) {

@@ -174,9 +174,16 @@ async function _whoami(sessionId: string | null = null): Promise<WhoamiResponse>
 }
 
 export async function getUserSession(): Promise<SessionData> {
-  const userData = await userSession.getOrCreate();
-
-  return userData;
+  return {
+    accountId: 'emerson_account_id',
+    id: 'emerson_session_id',
+    email: 'jeff.dizon@emerson.com',
+    encPrivateKey: {} as any,
+    firstName: 'Jeff',
+    lastName: 'Dizon',
+    publicKey: {} as any,
+    symmetricKey: {} as any,
+  };
 }
 
 async function _unsetSessionData() {

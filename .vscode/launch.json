@@ -3,7 +3,7 @@
   "configurations": [
     {
       "name": "Electron: main",
-      "type": "node",
+      "type": "pwa-node",
       "request": "launch",
       "protocol": "inspector",
       "sourceMaps": true,
@@ -14,10 +14,13 @@
       },
       "cwd": "${workspaceFolder}/packages/insomnia",
       "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/electron",
-      "runtimeArgs": ["--remote-debugging-port=9222", "."],
+      "runtimeArgs": [
+        "--remote-debugging-port=9222",
+        "."
+      ],
       "outputCapture": "std",
       "windows": {
-        "type": "node",
+        "type": "pwa-node",
         "request": "launch",
         "name": "Electron: main",
         "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/electron.cmd"
@@ -41,7 +44,7 @@
       "timeout": 60000
     },
     {
-      "type": "node",
+      "type": "pwa-node",
       "request": "launch",
       "protocol": "inspector",
       "smartStep": true,
@@ -52,7 +55,10 @@
       "autoAttachChildProcesses": true,
       "trace": true,
       "preLaunchTask": "Inso: Compile (Watch)",
-      "args": ["${input:insoCommand}", "${input:insoCommandArgs}"],
+      "args": [
+        "${input:insoCommand}",
+        "${input:insoCommandArgs}"
+      ],
       "console": "integratedTerminal"
     }
   ],
@@ -98,7 +104,10 @@
       },
       "stopAll": true,
       "preLaunchTask": "Insomnia: Compile (Watch)",
-      "configurations": ["Electron: main", "Electron: renderer"]
+      "configurations": [
+        "Electron: main",
+        "Electron: renderer"
+      ]
     }
   ]
 }

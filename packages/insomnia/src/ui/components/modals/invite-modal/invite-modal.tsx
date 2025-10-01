@@ -679,14 +679,22 @@ export interface Features {
 }
 
 async function getOrganizationFeatures(organizationId: string): Promise<Features> {
-  return insomniaFetch<Features>({
-    method: 'GET',
-    path: `/v1/organizations/${organizationId}/features`,
-    sessionId: await getCurrentSessionId(),
-    onlyResolveOnSuccess: true,
-  }).catch(() => {
-    throw new Error('Failed to fetch org features');
-  });
+  return {
+    features: {
+      cloudSync: {
+        enabled: true,
+      },
+      gitSync: {
+        enabled: false,
+      },
+      localVault: {
+        enabled: false,
+      },
+      orgBasicRbac: {
+        enabled: true,
+      },
+    },
+  };
 }
 
 /** Get all roles */

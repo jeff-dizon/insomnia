@@ -11,5 +11,7 @@ export function invariant(
   }
   // Condition not passed
 
+  console.log(typeof message === 'function' ? message() : message);
+
   throw new Error(typeof message === 'function' ? message() : message);
 }

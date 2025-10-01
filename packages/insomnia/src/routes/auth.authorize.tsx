@@ -4,68 +4,50 @@ import { href, redirect, useFetchers, useNavigate } from 'react-router';
 
 import { userSession as sessionModel } from '~/models';
 import { SegmentEvent } from '~/ui/analytics';
-import { getLoginUrl, submitAuthCode } from '~/ui/auth-session-provider.client';
+import { getLoginUrl } from '~/ui/auth-session-provider.client';
 import { Icon } from '~/ui/components/icon';
-import { insomniaFetch } from '~/ui/insomniaFetch';
-import { validateVaultKey } from '~/ui/vault-key.client';
 import { invariant } from '~/utils/invariant';
 import { createFetcherSubmitHook } from '~/utils/router';
-import { getVaultKeyFromStorage } from '~/utils/vault';
 
 import type { Route } from './+types/auth.authorize';
 
 export async function clientAction({ request }: Route.ClientActionArgs) {
-  const data = await request.json();
-
-  invariant(typeof data?.code === 'string', 'Expected code to be a string');
-  const error = await submitAuthCode(data.code);
-  if (error) {
-    const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
-    const humanReadableError =
-      errorMessage === 'Failed to fetch'
-        ? 'Network failed, please try again. If the problem persists, check your network and proxy settings.'
-        : errorMessage;
-    return {
-      errors: {
-        message: humanReadableError,
-      },
-    };
-  }
   console.log('Login successful');
   window.main.trackSegmentEvent({
     event: SegmentEvent.loginSuccess,
   });
   window.localStorage.setItem('hasUserLoggedInBefore', 'true');
   const userSession = await sessionModel.getOrCreate();
-  const { accountId, id: sessionId } = userSession;
-  try {
-    // check vault salt exists in server
-    const { salt: vaultSalt } = await insomniaFetch<{
-      salt?: string;
-      error?: string;
-    }>({
-      method: 'GET',
-      path: '/v1/user/vault',
-      sessionId,
-    });
-    if (vaultSalt) {
-      // save vault salt to session
-      await sessionModel.update(userSession, { vaultSalt });
-      // get vault key saved in local
-      const localVaultKey = await getVaultKeyFromStorage(accountId);
-      if (localVaultKey) {
-        // validate vault key with server
-        const validateResult = await validateVaultKey(userSession, localVaultKey, vaultSalt);
-        if (validateResult) {
-          // Encrypt vault key and save encrypted vault key & raw vault salt to session
-          const encryptedVaultKey = await window.main.secretStorage.encryptString(localVaultKey);
-          await sessionModel.update(userSession, { vaultKey: encryptedVaultKey, vaultSalt });
-        }
-      }
-    }
-  } catch (err) {
-    console.error(err);
-  }
+  await sessionModel.update(userSession, { id: 'testing', accountId: 'testing', vaultKey: '', vaultSalt: '' });
+  // const { accountId, id: sessionId } = userSession;
+  // try {
+  //   // check vault salt exists in server
+  //   const { salt: vaultSalt } = await insomniaFetch<{
+  //     salt?: string;
+  //     error?: string;
+  //   }>({
+  //     method: 'GET',
+  //     path: '/v1/user/vault',
+  //     sessionId,
+  //   });
+  //   if (vaultSalt) {
+  //     // save vault salt to session
+  //     await sessionModel.update(userSession, { vaultSalt });
+  //     // get vault key saved in local
+  //     const localVaultKey = await getVaultKeyFromStorage(accountId);
+  //     if (localVaultKey) {
+  //       // validate vault key with server
+  //       const validateResult = await validateVaultKey(userSession, localVaultKey, vaultSalt);
+  //       if (validateResult) {
+  //         // Encrypt vault key and save encrypted vault key & raw vault salt to session
+  //         const encryptedVaultKey = await window.main.secretStorage.encryptString(localVaultKey);
+  //         await sessionModel.update(userSession, { vaultKey: encryptedVaultKey, vaultSalt });
+  //       }
+  //     }
+  //   }
+  // } catch (err) {
+  //   console.error(err);
+  // }
 
   return redirect('/organization');
 }
@@ -99,36 +81,13 @@ const Component = () => {
   // 3 login and redirect back with token
   return (
     <div className="flex flex-col gap-[--padding-md] text-[--color-font]">
-      <Heading className="px-3 text-center text-2xl font-bold">Authorizing Insomnia</Heading>
+      <Heading className="px-3 text-center text-2xl font-bold">Authorizing Manila API Studio</Heading>
       {
         <Fragment>
-          <p>
-            A new page should have opened in your default web browser. Please log in. If you choose to login with SSO
-            and it uses a different email to your previous login your teams will not be migrated.
-          </p>
           <div className="flex flex-col gap-3 rounded-md bg-[--hl-sm] p-[--padding-md]">
             <p className="text-[rgba(var(--color-font-rgb),0.8))] text-start">
-              If you were not redirected back here after creating an account, please copy and paste the following URL
-              into your browser to complete login.
-            </p>
-            <div className="form-control form-control--outlined no-pad-top flex">
-              <input type="text" value={url} style={{ marginRight: 'var(--padding-sm)' }} readOnly />
-              <button
-                className="btn btn--super-compact btn--outlined"
-                onClick={copyUrl}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 'var(--padding-xs)',
-                }}
-              >
-                <i className="fa fa-clipboard" aria-hidden="true" />
-                Copy
-              </button>
-            </div>
-            <p className="text-[rgba(var(--color-font-rgb),0.8))] text-start">
-              If your browser does not open the Insomnia app automatically you can manually add the generated token
-              here.
+              If your browser does not open the Manila API Studio app automatically you can manually add the generated
+              token here.
             </p>
 
             <form

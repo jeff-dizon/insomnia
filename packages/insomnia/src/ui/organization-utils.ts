@@ -56,7 +56,7 @@ export function sortOrganizations(accountId: string, organizations: Organization
 
 export async function syncOrganizations(sessionId: string, accountId: string) {
   try {
-    const [organizationsResult, user, currentPlan] = await Promise.all([
+    const [organizationsResult, user] = await Promise.all([
       insomniaFetch<OrganizationsResponse | void>({
         method: 'GET',
         path: '/v1/organizations',
@@ -67,22 +67,28 @@ export async function syncOrganizations(sessionId: string, accountId: string) {
         path: '/v1/user/profile',
         sessionId,
       }),
-      insomniaFetch<CurrentPlan | void>({
-        method: 'GET',
-        path: '/v1/billing/current-plan',
-        sessionId,
-      }),
     ]);
 
-    invariant(organizationsResult && organizationsResult.organizations, 'Failed to load organizations');
+    const currentPlan: CurrentPlan = {
+      isActive: true,
+      planId: 'free',
+      planName: 'Free',
+      period: 'year',
+      price: 0,
+      quantity: 100000,
+      type: 'enterprise',
+    };
+
+    invariant(organizationsResult, 'Failed to load organizations');
     invariant(user && user.id, 'Failed to load user');
     invariant(currentPlan && currentPlan.planId, 'Failed to load current plan');
 
-    const { organizations } = organizationsResult;
-
     invariant(accountId, 'Account ID is not defined');
 
-    localStorage.setItem(`${accountId}:organizations`, JSON.stringify(sortOrganizations(accountId, organizations)));
+    localStorage.setItem(
+      `${accountId}:organizations`,
+      JSON.stringify(sortOrganizations(accountId, organizationsResult)),
+    );
     localStorage.setItem(`${accountId}:user`, JSON.stringify(user));
     localStorage.setItem(`${accountId}:currentPlan`, JSON.stringify(currentPlan));
   } catch (error) {
@@ -137,32 +143,13 @@ export async function fetchAndCacheOrganizationStorageRule(
       isOverridden: false,
     };
   }
-  if (!forceFetch) {
-    const storageRules = inMemoryStorageRuleCache.get(organizationId);
-    if (storageRules) {
-      return storageRules;
-    }
-  }
-  const { id: sessionId } = await userSession.getOrCreate();
 
-  // Otherwise fetch from the API
-  return await insomniaFetch<StorageRules>({
-    method: 'GET',
-    path: `/v1/organizations/${organizationId}/storage-rule`,
-    sessionId,
-    onlyResolveOnSuccess: true,
-  }).then(
-    res => {
-      if (res) {
-        inMemoryStorageRuleCache.set(organizationId, res);
-      }
-      return res || DEFAULT_STORAGE_RULES;
-    },
-    err => {
-      console.log('[storageRule] Failed to load storage rules', err.message);
-      return DEFAULT_STORAGE_RULES;
-    },
-  );
+  return {
+    enableCloudSync: true,
+    enableLocalVault: true,
+    enableGitSync: false,
+    isOverridden: false,
+  };
 }
 
 interface TeamProject {
@@ -177,18 +164,13 @@ async function getAllTeamProjects(organizationId: string) {
   }
 
   console.log('[project] Fetching', organizationId);
-  const response = await insomniaFetch<{
-    data: {
-      id: string;
-      name: string;
-    }[];
-  }>({
+  const response = await insomniaFetch<TeamProject[]>({
     path: `/v1/organizations/${organizationId}/team-projects`,
     method: 'GET',
     sessionId,
   });
 
-  return response.data as TeamProject[];
+  return response;
 }
 
 async function syncTeamProjects({

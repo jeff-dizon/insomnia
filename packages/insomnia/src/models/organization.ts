@@ -12,7 +12,7 @@ export interface Organization {
   name: string;
   display_name: string;
   branding?: Branding;
-  metadata: Metadata;
+  metadata?: Metadata;
 }
 
 export interface StorageRules {
@@ -25,10 +25,10 @@ export interface StorageRules {
 export const SCRATCHPAD_ORGANIZATION_ID = 'org_scratchpad';
 export const isScratchpadOrganizationId = (organizationId: string) => organizationId === SCRATCHPAD_ORGANIZATION_ID;
 export const isPersonalOrganization = (organization: Organization) =>
-  organization.metadata.organizationType === 'personal';
+  organization.metadata?.organizationType === 'personal';
 
 export const isOwnerOfOrganization = ({ organization, accountId }: { organization: Organization; accountId: string }) =>
-  organization.metadata.ownerAccountId === accountId;
+  organization.metadata?.ownerAccountId === accountId;
 
 export const findPersonalOrganization = (organizations: Organization[], accountId: string) => {
   return organizations.filter(isPersonalOrganization).find(organization =>
@@ -38,14 +38,7 @@ export const findPersonalOrganization = (organizations: Organization[], accountI
     }),
   );
 };
-export interface OrganizationsResponse {
-  start: number;
-  limit: number;
-  length: number;
-  total: number;
-  next: string;
-  organizations: Organization[];
-}
+export type OrganizationsResponse = Organization[];
 
 export interface UserProfileResponse {
   id: string;

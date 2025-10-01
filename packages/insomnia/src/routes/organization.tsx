@@ -601,17 +601,6 @@ const Component = ({ loaderData }: Route.ComponentProps) => {
                         sync={syncOrgsAndProjects}
                       />
                     )}
-                    {!isMinimal && (
-                      <Link>
-                        <a
-                          className="flex items-center gap-1 px-[--padding-md] text-xs text-[--color-font] focus:underline focus:outline-none"
-                          href="https://konghq.com/"
-                        >
-                          Made with
-                          <Icon className="text-[--color-surprise-font]" icon="heart" /> by Kong
-                        </a>
-                      </Link>
-                    )}
                   </div>
                   {isMinimal && (
                     <div className="flex items-center justify-end gap-[--padding-sm] p-2">

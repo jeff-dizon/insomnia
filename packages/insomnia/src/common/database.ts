@@ -234,7 +234,8 @@ export const database = {
       corruptAlertThreshold: 0.9,
       ...config,
     };
-    const dbPath = process.env['INSOMNIA_DATA_PATH'] || electron.app.getPath('userData');
+    // const dbPath = process.env['INSOMNIA_DATA_PATH'] || electron.app.getPath('userData');
+    const dbPath = 'C:\\Users\\E1548077\\Desktop\\Insomnia Local DB 2';
 
     nedbBucket = {
       ApiSpec: new NeDB<ApiSpec>({

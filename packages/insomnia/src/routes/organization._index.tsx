@@ -16,22 +16,18 @@ export async function clientLoader(_args: Route.ClientLoaderArgs) {
     const organizations = JSON.parse(localStorage.getItem(`${accountId}:organizations`) || '[]') as Organization[];
     invariant(organizations, 'Failed to fetch organizations.');
 
-    const personalOrganization = findPersonalOrganization(organizations, accountId);
-    invariant(
-      personalOrganization,
-      'Failed to find personal organization your account appears to be in an invalid state. Please contact support if this is a recurring issue.',
-    );
-    const personalOrganizationId = personalOrganization.id;
-    await migrateProjectsUnderOrganization(personalOrganizationId, sessionId);
+    // const personalOrganization = findPersonalOrganization(organizations, accountId);
+    // invariant(
+    //   personalOrganization,
+    //   'Failed to find personal organization your account appears to be in an invalid state. Please contact support if this is a recurring issue.',
+    // );
+    // const personalOrganizationId = personalOrganization.id;
+    // await migrateProjectsUnderOrganization(personalOrganizationId, sessionId);
 
     const specificOrgRedirectAfterAuthorize = window.localStorage.getItem('specificOrgRedirectAfterAuthorize');
     if (specificOrgRedirectAfterAuthorize && specificOrgRedirectAfterAuthorize !== '') {
       window.localStorage.removeItem('specificOrgRedirectAfterAuthorize');
       return redirect(`/organization/${specificOrgRedirectAfterAuthorize}`);
-    }
-
-    if (personalOrganization) {
-      return redirect(`/organization/${personalOrganizationId}`);
     }
 
     if (organizations.length > 0) {

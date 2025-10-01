@@ -4,7 +4,7 @@ import { useAvatarImageCache } from '../hooks/image-cache';
 
 const getNameInitials = (name: string) => {
   // Split on whitespace and take first letter of each word
-  const words = name.toUpperCase().split(' ');
+  const words = name?.toUpperCase().split(' ') || '';
   const firstWord = words[0];
   const lastWord = words[words.length - 1];
 

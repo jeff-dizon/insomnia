@@ -136,7 +136,8 @@ export enum UpdateURL {
 export const getOauthRedirectUrl = () => env.OAUTH_REDIRECT_URL || 'https://app.insomnia.rest/oauth/redirect';
 
 // API
-export const getApiBaseURL = () => env.INSOMNIA_API_URL || 'https://api.insomnia.rest';
+// export const getApiBaseURL = () => env.INSOMNIA_API_URL || 'https://api.insomnia.rest';
+export const getApiBaseURL = () => 'https://localhost:7195/api';
 export const getMockServiceURL = () => env.INSOMNIA_MOCK_API_URL || 'https://mock.insomnia.run';
 
 export const getMockServiceBinURL = (mockServer: MockServer, path: string) => {

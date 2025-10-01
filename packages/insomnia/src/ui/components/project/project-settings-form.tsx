@@ -282,19 +282,6 @@ export const ProjectSettingsForm: FC<Props> = ({
                     Encrypted and synced securely to the cloud, ideal for out of the box collaboration.
                   </p>
                 </Radio>
-                <Radio
-                  isDisabled={!isGitSyncEnabled || !storageRules.enableGitSync}
-                  value="git"
-                  className="flex-1 rounded border border-solid border-[--hl-md] p-4 transition-colors hover:bg-[--hl-xs] focus:bg-[--hl-sm] focus:outline-none data-[selected]:border-[--color-surprise] data-[disabled]:opacity-25 data-[selected]:ring-2 data-[selected]:ring-[--color-surprise]"
-                >
-                  <div className="flex items-center gap-2">
-                    <Icon icon={['fab', 'git-alt']} />
-                    <Heading className="text-lg font-bold">Git Sync</Heading>
-                  </div>
-                  <p className="pt-2">
-                    Stored locally and synced to a Git repository. Ideal for version control and collaboration.
-                  </p>
-                </Radio>
               </div>
             </RadioGroup>
             {showStorageRestrictionMessage && (

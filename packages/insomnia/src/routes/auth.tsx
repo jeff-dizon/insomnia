@@ -102,15 +102,6 @@ const Component = () => {
               </Tooltip>
             </TooltipTrigger>
             <span className="h-full w-[1px] bg-[--hl-sm]" />
-            <Link>
-              <a
-                className="flex items-center gap-1 px-[--padding-md] text-xs text-[--color-font] focus:underline focus:outline-none"
-                href="https://konghq.com/"
-              >
-                Made with
-                <Icon className="text-[--color-surprise-font]" icon="heart" /> by Kong
-              </a>
-            </Link>
           </div>
         </div>
       </div>

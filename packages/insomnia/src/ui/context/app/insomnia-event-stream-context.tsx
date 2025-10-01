@@ -122,6 +122,8 @@ export const InsomniaEventStreamProvider: FC<PropsWithChildren> = ({ children })
 
   // Update presence when the user switches org, projects, workspaces
   useEffect(() => {
+    // TODO: Update logic for online status.
+
     async function updatePresence() {
       const sessionId = userSession.id;
       if (sessionId && remoteId) {
@@ -148,7 +150,7 @@ export const InsomniaEventStreamProvider: FC<PropsWithChildren> = ({ children })
       }
     }
 
-    updatePresence();
+    // updatePresence();
   }, [organizationId, remoteId, userSession.id, workspaceId]);
 
   const { revalidate } = useRevalidator();

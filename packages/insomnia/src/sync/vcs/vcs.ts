@@ -8,6 +8,7 @@ import clone from 'clone';
 
 import * as crypt from '../../account/crypt';
 import * as session from '../../account/session';
+import { getCurrentSessionId } from '../../account/session';
 import type { Operation } from '../../common/database';
 import { generateId } from '../../common/misc';
 import type { BaseModel } from '../../models';
@@ -27,7 +28,7 @@ import type {
   StageEntry,
   StatusCandidate,
 } from '../types';
-import type { BackendProjectWithTeams } from './normalize-backend-project-team';
+import type { BackendProjectWithTeam } from './normalize-backend-project-team';
 import {
   compareBranches,
   generateCandidateMap,
@@ -119,17 +120,11 @@ export class VCS {
 
   async archiveProject() {
     const backendProjectId = this._backendProjectId();
-    await this._runGraphQL(
-      `
-        mutation ($id: ID!) {
-          projectArchive(id: $id)
-        }
-      `,
-      {
-        id: backendProjectId,
-      },
-      'projectArchive',
-    );
+    await insomniaFetch({
+      method: 'POST',
+      path: `/v1/workspaces/${backendProjectId}/archive`,
+      sessionId: await getCurrentSessionId(),
+    });
     console.log(`[sync] Archived remote project ${backendProjectId}`);
     await this._store.removeItem(`/projects/${backendProjectId}/meta.json`);
     this._backendProject = null;
@@ -162,26 +157,16 @@ export class VCS {
     console.log(
       `[remoteBackendProjects] Fetching remote workspaces for teamId=${teamId} teamProjectId=${teamProjectId}`,
     );
-    const { projects } = await this._runGraphQL<{ projects: BackendProjectWithTeams[] }>(
-      `
-        query ($teamId: ID, $teamProjectId: ID) {
-          projects(teamId: $teamId, teamProjectId: $teamProjectId) {
-            id
-            name
-            rootDocumentId
-            teams {
-              id
-              name
-            }
-          }
-        }
-      `,
-      {
-        teamId,
-        teamProjectId,
-      },
-      'projects',
-    );
+
+    const queryParams = new URLSearchParams();
+    teamId && queryParams.set('organizationId', teamId);
+    teamProjectId && queryParams.set('projectId', teamProjectId);
+
+    const projects = await insomniaFetch<BackendProjectWithTeam[]>({
+      method: 'GET',
+      path: `/v1/workspaces?${queryParams.toString()}`,
+      sessionId: await getCurrentSessionId(),
+    });
 
     console.log(`[remoteBackendProjects] Fetched ${projects.length} remote workspaces`);
 
@@ -189,8 +174,7 @@ export class VCS {
       id: backend.id,
       name: backend.name,
       rootDocumentId: backend.rootDocumentId,
-      // A backend project is guaranteed to exist on exactly one team
-      team: backend.teams[0],
+      team: backend.team,
     }));
   }
 
@@ -509,18 +493,12 @@ export class VCS {
   }
 
   async getRemoteBranchNames(): Promise<string[]> {
-    const { branches } = await this._runGraphQL<{ branches: { name: string }[] | null }>(
-      `
-      query ($projectId: ID!) {
-        branches(project: $projectId) {
-          name
-        }
-      }`,
-      {
-        projectId: this._backendProjectId(),
-      },
-      'branches',
-    );
+    const branches = await insomniaFetch<Branch[]>({
+      method: 'GET',
+      path: '/v1/workspaces/' + this._backendProjectId() + '/branches',
+      sessionId: await getCurrentSessionId(),
+    });
+
     // TODO: Fix server returning null instead of empty list
     return (branches || []).map(b => b.name);
   }
@@ -649,8 +627,7 @@ export class VCS {
       throw new Error('teamId should be defined');
     }
 
-    const teamKeys = await this._queryTeamMemberKeys(teamId);
-    return this._queryCreateProject(rootDocumentId, name, teamId, teamProjectId, teamKeys.memberKeys);
+    return this._queryCreateProject(rootDocumentId, name, teamId, teamProjectId);
   }
 
   // TODO: may be we can create another push function for initial push, so that we can reduce some api calls
@@ -878,21 +855,16 @@ export class VCS {
   }
 
   async _queryBlobsMissing(ids: string[]): Promise<string[]> {
-    const { blobsMissing } = await this._runGraphQL<{ blobsMissing: { missing: string[] } }>(
-      `
-          query ($projectId: ID!, $ids: [ID!]!) {
-            blobsMissing(project: $projectId, ids: $ids) {
-              missing
-            }
-          }
-        `,
-      {
-        ids,
-        projectId: this._backendProjectId(),
+    const blobsMissing = await insomniaFetch<{ missingBlobIds: string[] }>({
+      method: 'POST',
+      path: '/v1/blobs/missing-blobs',
+      sessionId: await getCurrentSessionId(),
+      data: {
+        workspaceId: this._backendProjectId(),
+        blobIds: ids,
       },
-      'missingBlobs',
-    );
-    return blobsMissing.missing;
+    });
+    return blobsMissing.missingBlobIds;
   }
 
   async _queryRemoveBranch(branchName: string) {
@@ -910,22 +882,12 @@ export class VCS {
   }
 
   async _queryBranch(branchName: string): Promise<Branch | null> {
-    const { branch } = await this._runGraphQL<{ branch: Branch | null }>(
-      `
-      query ($projectId: ID!, $branch: String!) {
-        branch(project: $projectId, name: $branch) {
-          created
-          modified
-          name
-          snapshots
-        }
-      }`,
-      {
-        projectId: this._backendProjectId(),
-        branch: branchName,
-      },
-      'branch',
-    );
+    const branch = await insomniaFetch<Branch | null>({
+      method: 'GET',
+      path: `/v1/workspaces/${this._backendProjectId()}/branches/${branchName}`,
+      sessionId: await getCurrentSessionId(),
+    });
+
     return branch;
   }
 
@@ -981,44 +943,26 @@ export class VCS {
       }
 
       const branch = await this._getCurrentBranch();
-      const { snapshotsCreate } = await this._runGraphQL<{ snapshotsCreate: Snapshot[] }>(
-        `
-        mutation ($projectId: ID!, $snapshots: [SnapshotInput!]!, $branchName: String!) {
-          snapshotsCreate(project: $projectId, snapshots: $snapshots, branch: $branchName) {
-            id
-            parent
-            created
-            author
-            authorAccount {
-              firstName
-              lastName
-              email
-            }
-            name
-            description
-            state {
-              blob
-              key
-              name
-            }
-          }
-        }
-      `,
-        {
-          branchName: branch.name,
-          projectId: this._backendProjectId(),
-          snapshots: snapshots.map(s => ({
-            created: s.created,
-            name: s.name,
-            description: s.description,
-            parent: s.parent,
-            id: s.id,
-            author: s.author,
-            state: s.state,
-          })),
-        },
-        'snapshotsPush',
-      );
+      const body = {
+        branchName: branch.name,
+        workspaceId: this._backendProjectId(),
+        snapshots: snapshots.map(s => ({
+          created: s.created,
+          name: s.name,
+          description: s.description,
+          parent: s.parent,
+          id: s.id,
+          author: s.author,
+          state: s.state,
+        })),
+      };
+      const snapshotsCreate = await insomniaFetch<Snapshot[]>({
+        method: 'POST',
+        path: `/v1/snapshots/create`,
+        sessionId: await getCurrentSessionId(),
+        data: body,
+      });
+
       // Store them in case something has changed
       await this._storeSnapshots(snapshotsCreate);
       console.log('[sync] Pushed commits', snapshotsCreate.map((s: any) => s.id).join(', '));
@@ -1026,28 +970,21 @@ export class VCS {
   }
 
   async _queryBlobs(allIds: string[]) {
-    const symmetricKey = await this._getBackendProjectSymmetricKey();
     const result: Record<string, Buffer> = {};
 
     for (const ids of chunkArray(allIds, 50)) {
-      const { blobs } = await this._runGraphQL<{ blobs: { id: string; content: string }[] }>(
-        `
-      query ($ids: [ID!]!, $projectId: ID!) {
-        blobs(ids: $ids, project: $projectId) {
-          id
-          content
-        }
-      }`,
-        {
-          ids,
-          projectId: this._backendProjectId(),
+      const blobs = await insomniaFetch<{ id: string; content: string }[]>({
+        method: 'POST',
+        path: `/v1/workspaces/${this._backendProjectId()}/blobs`,
+        sessionId: await getCurrentSessionId(),
+        data: {
+          blobIds: ids,
         },
-        'blobs',
-      );
+      });
 
       for (const blob of blobs) {
-        const encryptedResult = JSON.parse(blob.content);
-        result[blob.id] = crypt.decryptAESToBuffer(symmetricKey, encryptedResult);
+        const parsedContent = JSON.parse(blob.content);
+        result[blob.id] = parsedContent;
       }
     }
 
@@ -1056,8 +993,6 @@ export class VCS {
 
   // upload blobs to the backend
   async _queryPushBlobs(allIds: string[]) {
-    const symmetricKey = await this._getBackendProjectSymmetricKey();
-
     const next = async (
       items: {
         id: string;
@@ -1068,24 +1003,20 @@ export class VCS {
         id: i.id,
         content: i.content,
       }));
-      const { blobsCreate } = await this._runGraphQL<{ blobsCreate: { count: number } }>(
-        `
-          mutation ($projectId: ID!, $blobs: [BlobInput!]!) {
-            blobsCreate(project: $projectId, blobs: $blobs) {
-              count
-            }
-          }
-        `,
-        {
+
+      const result = await insomniaFetch<number>({
+        method: 'POST',
+        path: '/v1/blobs/create',
+        sessionId: await getCurrentSessionId(),
+        data: {
+          workspaceId: this._backendProjectId(),
           blobs: encodedBlobs,
-          projectId: this._backendProjectId(),
         },
-        'blobsCreate',
-      );
-      return blobsCreate.count;
+      });
+
+      return result;
     };
 
-    // Push each missing blob in batches of 2MB max
     let count = 0;
     let batch: { id: string; content: string }[] = [];
     let batchSizeBytes = 0;
@@ -1101,10 +1032,9 @@ export class VCS {
         throw new Error(`Failed to get blob id=${id}`);
       }
 
-      const encryptedResult = crypt.encryptAESBuffer(symmetricKey, content);
       batch.push({
         id,
-        content: JSON.stringify(encryptedResult, null, 2),
+        content: JSON.stringify(content, null, 2),
       });
       batchSizeBytes += content.length;
       const isLastId = i === allIds.length - 1;
@@ -1139,21 +1069,12 @@ export class VCS {
   }
 
   async _queryProject(): Promise<BackendProject | null> {
-    const { project } = await this._runGraphQL<{ project: BackendProject | null }>(
-      `
-        query ($id: ID!) {
-          project(id: $id) {
-            id
-            name
-            rootDocumentId
-          }
-        }
-      `,
-      {
-        id: this._backendProjectId(),
-      },
-      'project',
-    );
+    const project = await insomniaFetch<BackendProject | null>({
+      method: 'GET',
+      path: `/v1/workspaces/${this._backendProjectId()}`,
+      sessionId: await getCurrentSessionId(),
+    });
+
     return project;
   }
 
@@ -1196,70 +1117,23 @@ export class VCS {
     return teamMemberKeys;
   }
 
-  async _queryCreateProject(
-    workspaceId: string,
-    workspaceName: string,
-    teamId: string,
-    teamProjectId: string,
-    teamPublicKeys?: {
-      accountId: string;
-      publicKey: string;
-      autoLinked: boolean;
-    }[],
-  ) {
-    // Generate symmetric key for ResourceGroup
-    const symmetricKey = await crypt.generateAES256Key();
-    const symmetricKeyStr = JSON.stringify(symmetricKey);
-
-    const teamKeys: { accountId: string; encSymmetricKey: string; autoLinked: boolean }[] = [];
-
-    if (!teamId || !teamPublicKeys?.length) {
-      throw new Error('teamId and teamPublicKeys must not be null or empty!');
+  async _queryCreateProject(workspaceId: string, workspaceName: string, teamId: string, teamProjectId: string) {
+    if (!teamId) {
+      throw new Error('teamId must not be null or empty!');
     }
 
-    // Encrypt the symmetric key with the public keys of all the team members, ourselves included
-    for (const { accountId, publicKey, autoLinked } of teamPublicKeys) {
-      teamKeys.push({
-        autoLinked,
-        accountId,
-        encSymmetricKey: crypt.encryptRSAWithJWK(JSON.parse(publicKey), symmetricKeyStr),
-      });
-    }
-
-    const { projectCreate } = await this._runGraphQL<{ projectCreate: BackendProject }>(
-      `
-        mutation (
-          $name: String!,
-          $id: ID!,
-          $rootDocumentId: ID!,
-          $teamId: ID,
-          $teamProjectId: ID,
-          $teamKeys: [ProjectCreateKeyInput!],
-        ) {
-          projectCreate(
-            name: $name,
-            id: $id,
-            rootDocumentId: $rootDocumentId,
-            teamId: $teamId,
-            teamKeys: $teamKeys,
-            teamProjectId: $teamProjectId
-          ) {
-            id
-            name
-            rootDocumentId
-          }
-        }
-      `,
-      {
-        name: workspaceName,
+    const projectCreate = await insomniaFetch<BackendProject>({
+      method: 'POST',
+      path: `/v1/workspaces`,
+      data: {
         id: this._backendProjectId(),
+        name: workspaceName,
         rootDocumentId: workspaceId,
-        teamId: teamId,
-        teamKeys: teamKeys,
-        teamProjectId,
+        organizationId: teamId,
+        projectId: teamProjectId,
       },
-      'createProject',
-    );
+      sessionId: await getCurrentSessionId(),
+    });
 
     console.log(`[sync] Created remote project ${projectCreate.id} (${projectCreate.name})`);
     return projectCreate as BackendProject;
@@ -1314,15 +1188,15 @@ export class VCS {
 
   async _assertSession() {
     const { accountId, id, publicKey } = await session.getUserSession();
-    const privateKey = await session.getPrivateKey();
-    if (!id) {
-      throw new Error('Not logged in');
-    }
+    // const privateKey = await session.getPrivateKey();
+    // if (!id) {
+    //   throw new Error('Not logged in');
+    // }
 
     return {
       accountId,
       sessionId: id,
-      privateKey,
+      privateKey: {} as any,
       publicKey,
     };
   }
