@@ -336,7 +336,11 @@ export class VCS {
       throw new Error('Cannot delete master branch');
     }
 
-    await this._queryRemoveBranch(branchName);
+    await insomniaFetch({
+      path: `/v1/workspaces/${this._backendProjectId()}/branches/${branchName}`,
+      method: 'DELETE',
+      sessionId: await getCurrentSessionId(),
+    });
     console.log(`[sync] Deleted remote branch ${branchName}`);
   }
 
@@ -719,6 +723,17 @@ export class VCS {
     return branch;
   }
 
+  async _querySnapshots(ids: string[]) {
+    const snapshots = await insomniaFetch<Snapshot[]>({
+      method: 'POST',
+      path: '/snapshots',
+      data: ids,
+      sessionId: await getCurrentSessionId(),
+    });
+
+    return snapshots;
+  }
+
   async _merge(
     candidates: StatusCandidate[],
     trunkBranchName: string,
@@ -836,24 +851,6 @@ export class VCS {
     return snapshot;
   }
 
-  async _runGraphQL<T>(query: string, variables: Record<string, any>, name: string): Promise<T> {
-    const { sessionId } = await this._assertSession();
-
-    const { data, errors } = await insomniaFetch<{ data: T; errors: [{ message: string }] }>({
-      method: 'POST',
-      path: '/graphql?' + name,
-      data: { query, variables },
-      sessionId,
-    });
-
-    if (errors && errors.length) {
-      console.log(`[sync] Failed to query ${name}`, errors);
-      throw new Error(`Failed to query ${name}: ${errors[0].message}`);
-    }
-
-    return data;
-  }
-
   async _queryBlobsMissing(ids: string[]): Promise<string[]> {
     const blobsMissing = await insomniaFetch<{ missingBlobIds: string[] }>({
       method: 'POST',
@@ -867,20 +864,6 @@ export class VCS {
     return blobsMissing.missingBlobIds;
   }
 
-  async _queryRemoveBranch(branchName: string) {
-    await this._runGraphQL(
-      `
-      mutation ($projectId: ID!, $branch: String!) {
-        branchRemove(project: $projectId, name: $branch)
-      }`,
-      {
-        projectId: this._backendProjectId(),
-        branch: branchName,
-      },
-      'removeBranch',
-    );
-  }
-
   async _queryBranch(branchName: string): Promise<Branch | null> {
     const branch = await insomniaFetch<Branch | null>({
       method: 'GET',
@@ -889,44 +872,6 @@ export class VCS {
     });
 
     return branch;
-  }
-
-  async _querySnapshots(allIds: string[]) {
-    let allSnapshots: Snapshot[] = [];
-
-    for (const ids of chunkArray(allIds, 20)) {
-      const { snapshots } = await this._runGraphQL<{ snapshots: Snapshot[] }>(
-        `
-        query ($ids: [ID!]!, $projectId: ID!) {
-          snapshots(ids: $ids, project: $projectId) {
-            id
-            parent
-            created
-            author
-            authorAccount {
-              firstName
-              lastName
-              email
-            }
-            name
-            description
-            state {
-              blob
-              key
-              name
-            }
-          }
-        }`,
-        {
-          ids,
-          projectId: this._backendProjectId(),
-        },
-        'snapshots',
-      );
-      allSnapshots = [...allSnapshots, ...snapshots];
-    }
-
-    return allSnapshots;
   }
 
   // push snapshots to the backend's current branch
@@ -1051,23 +996,6 @@ export class VCS {
     console.log(`[sync] Finished uploading ${count}/${allIds.length} blobs`);
   }
 
-  async _queryBackendProjectKey() {
-    const { projectKey } = await this._runGraphQL<{ projectKey: { encSymmetricKey: string } }>(
-      `
-        query ($projectId: ID!) {
-          projectKey(projectId: $projectId) {
-            encSymmetricKey
-          }
-        }
-      `,
-      {
-        projectId: this._backendProjectId(),
-      },
-      'projectKey',
-    );
-    return projectKey.encSymmetricKey as string;
-  }
-
   async _queryProject(): Promise<BackendProject | null> {
     const project = await insomniaFetch<BackendProject | null>({
       method: 'GET',
@@ -1076,45 +1004,6 @@ export class VCS {
     });
 
     return project;
-  }
-
-  async _queryTeamMemberKeys(teamId: string): Promise<{
-    memberKeys: {
-      accountId: string;
-      publicKey: string;
-      autoLinked: boolean;
-    }[];
-  }> {
-    console.log('[sync] Fetching team member keys', {
-      teamId,
-    });
-
-    const { teamMemberKeys } = await this._runGraphQL<{
-      teamMemberKeys: {
-        memberKeys: {
-          accountId: string;
-          publicKey: string;
-          autoLinked: boolean;
-        }[];
-      };
-    }>(
-      `
-        query ($teamId: ID!) {
-          teamMemberKeys(teamId: $teamId) {
-            memberKeys {
-              accountId
-              publicKey
-              autoLinked
-            }
-          }
-        }
-      `,
-      {
-        teamId: teamId,
-      },
-      'teamMemberKeys',
-    );
-    return teamMemberKeys;
   }
 
   async _queryCreateProject(workspaceId: string, workspaceName: string, teamId: string, teamProjectId: string) {
@@ -1146,14 +1035,6 @@ export class VCS {
 
   async _getBackendProjectById(projectId: string): Promise<BackendProject | null> {
     return this._store.getItem(`/projects/${projectId}/meta.json`);
-  }
-
-  async _getBackendProjectSymmetricKey() {
-    const { privateKey } = await this._assertSession();
-
-    const encSymmetricKey = await this._queryBackendProjectKey();
-    const symmetricKeyStr = crypt.decryptRSAWithJWK(privateKey, encSymmetricKey);
-    return JSON.parse(symmetricKeyStr);
   }
 
   async _assertBackendProject() {
