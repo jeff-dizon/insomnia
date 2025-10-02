@@ -116,7 +116,7 @@ app.on('ready', async () => {
 });
 
 // Set as default protocol
-const defaultProtocol = `insomnia${isDevelopment() ? 'dev' : ''}`;
+const defaultProtocol = `emerson-manila-api-studio${isDevelopment() ? 'dev' : ''}`;
 const fullDefaultProtocol = `${defaultProtocol}://`;
 let defaultProtocolSuccessful: boolean;
 if (isDevelopment()) {

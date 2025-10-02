@@ -13,8 +13,8 @@ import { useStorageRulesActionFetcher } from '~/routes/organization.$organizatio
 import { useOrganizationSyncProjectsActionFetcher } from '~/routes/organization.$organizationId.sync-projects';
 import { useOrganizationSyncActionFetcher } from '~/routes/organization.sync';
 import { VCSInstance } from '~/sync/vcs/insomnia-sync';
-import { avatarImageCache } from '~/ui/hooks/image-cache';
 import { customFetch } from '~/ui/customFetch';
+import { avatarImageCache } from '~/ui/hooks/image-cache';
 
 const InsomniaEventStreamContext = createContext<{
   presence: UserPresence[];

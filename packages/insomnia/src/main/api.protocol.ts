@@ -5,7 +5,7 @@ import { parse as urlParse } from 'node:url';
 import { Curl, CurlAuth, CurlFeature, CurlProxy, CurlSslOpt, type HeaderInfo } from '@getinsomnia/node-libcurl';
 import { app, net, protocol, session } from 'electron';
 
-import { getApiBaseURL } from '../common/constants';
+import { getApiBaseURL, isDevelopment } from '../common/constants';
 import { get as getSettings } from '../models/settings';
 import * as _userSession from '../models/user-session';
 import { setDefaultProtocol } from './network/libcurl-promise';
@@ -150,7 +150,13 @@ export async function registerInsomniaProtocols() {
             `X-Session-Id: ${sessionId || ''}`,
           ]);
 
-          curl.on('error', () => {
+          if (isDevelopment()) {
+            curl.setOpt(Curl.option.SSL_VERIFYPEER, false);
+            curl.setOpt(Curl.option.SSL_VERIFYHOST, 0);
+          }
+
+          curl.on('error', (errorMessage, errorCode) => {
+            console.error('Curl error:', errorMessage, 'code:', errorCode);
             curl.close();
           });
 
