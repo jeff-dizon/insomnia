@@ -1,15 +1,10 @@
 {
-  "name": "insomnia",
+  "name": "emerson-manila-api-studio",
   "private": true,
   "version": "1.0.0",
   "author": "Kong <office@konghq.com>",
-  "description": "Insomnia is a cross-platform REST client, built on top of Electron.",
+  "description": "Emerson Manila API Studio is a tool for designing, testing, and managing APIs efficiently.",
   "license": "Apache-2.0",
-  "repository": "https://github.com/kong/insomnia",
-  "bugs": {
-    "url": "https://github.com/kong/insomnia/issues"
-  },
-  "homepage": "https://github.com/kong/insomnia#readme",
   "engines": {
     "node": ">=22.17.1",
     "npm": ">=10"

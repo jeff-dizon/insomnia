@@ -76,7 +76,7 @@ export async function customFetch<T = void>({
     return isJson ? response.json() : (response.text() as Promise<T>);
   } catch (err) {
     if (err.name === 'AbortError') {
-      throw new Error('insomniaFetch timed out');
+      throw new Error('custom fetch timed out');
     } else {
       throw err;
     }
