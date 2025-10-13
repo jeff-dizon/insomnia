@@ -2,7 +2,6 @@ import { href, redirect, type ShouldRevalidateFunctionArgs } from 'react-router'
 
 import { userSession } from '~/models';
 import { isScratchpadOrganizationId, type Organization } from '~/models/organization';
-import { customFetch } from '~/ui/customFetch';
 import { createFetcherLoadHook } from '~/utils/router';
 
 import type { Route } from './+types/organization.$organizationId.permissions';
@@ -24,7 +23,7 @@ export const fallbackBilling = Object.freeze<Billing>({
 
 export async function clientLoader({ params }: Route.ClientLoaderArgs) {
   const { organizationId } = params;
-  const { id: sessionId, accountId } = await userSession.getOrCreate();
+  const { accountId } = await userSession.getOrCreate();
 
   if (isScratchpadOrganizationId(organizationId)) {
     return {

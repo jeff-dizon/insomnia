@@ -38,6 +38,7 @@
   "devDependencies": {
     "@eslint/js": "^9.23.0",
     "@types/chai": "^4.3.14",
+    "@types/event-source-polyfill": "^1.0.5",
     "@types/har-format": "^1.2.15",
     "@types/mocha": "^10.0.6",
     "@types/node": "^24.2.1",
@@ -63,6 +64,10 @@
     "vitest": "^3.2.4"
   },
   "dependencies": {
-    "@getinsomnia/node-libcurl": "3.0.0"
+    "@azure/msal-browser": "^4.24.1",
+    "@azure/msal-node": "^3.8.0",
+    "@azure/msal-react": "^3.0.20",
+    "@getinsomnia/node-libcurl": "3.0.0",
+    "event-source-polyfill": "^1.0.31"
   }
 }

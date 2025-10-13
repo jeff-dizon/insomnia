@@ -135,8 +135,24 @@ export enum UpdateURL {
 // Oauth redirect URL
 export const getOauthRedirectUrl = () => env.OAUTH_REDIRECT_URL || 'https://app.insomnia.rest/oauth/redirect';
 
-// API
-// export const getApiBaseURL = () => env.INSOMNIA_API_URL || 'https://api.insomnia.rest';
+export const AADConfig = {
+  authOptions: {
+    clientId: '5e31f0d0-0072-4c13-977e-8c9ec2dd8869',
+    authority: 'https://login.microsoftonline.com/eb06985d-06ca-4a17-81da-629ab99f6505',
+  },
+  resourceApi: {
+    endpoint: 'https://graph.microsoft.com/v1.0',
+    scopes: ['User.Read'],
+  },
+  customProtocol: {
+    name: 'msal5e31f0d0-0072-4c13-977e-8c9ec2dd8869',
+  },
+  cache: {
+    cacheLocation: `${process.env.APPDATA || process.env.HOME || process.env.USERPROFILE || ''}/insomnia/cache.json`,
+  },
+  scopes: ['api://5e31f0d0-0072-4c13-977e-8c9ec2dd8869/access_as_user'],
+};
+
 export const getApiBaseURL = () => 'https://localhost:7195/api';
 export const getMockServiceURL = () => env.INSOMNIA_MOCK_API_URL || 'https://mock.insomnia.run';
 

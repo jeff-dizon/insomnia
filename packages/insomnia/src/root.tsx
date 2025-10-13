@@ -23,7 +23,6 @@ import type { UserSession } from '~/models/user-session';
 import { executePluginMainAction, reloadPlugins } from '~/plugins';
 import { createPlugin } from '~/plugins/create';
 import { setTheme } from '~/plugins/misc';
-import { useAuthorizeActionFetcher } from '~/routes/auth.authorize';
 import { useDefaultBrowserRedirectActionFetcher } from '~/routes/auth.default-browser-redirect';
 import { useLogoutFetcher } from '~/routes/auth.logout';
 import { useCreateCloudCredentialActionFetcher } from '~/routes/cloud-credentials.create';
@@ -294,7 +293,6 @@ const Root = () => {
 
   const [importUri, setImportUri] = useState('');
   const { submit: createCloudCredentials } = useCreateCloudCredentialActionFetcher();
-  const { submit: authorizeSubmit } = useAuthorizeActionFetcher();
   const { submit: logoutSubmit } = useLogoutFetcher();
   const { submit: githubCompleteSignInSubmit } = useGithubCompleteSignInFetcher();
   const { submit: gitLabCompleteSignInSubmit } = useGitLabCompleteSignInFetcher();
@@ -417,11 +415,6 @@ const Root = () => {
           state,
         });
       }
-      if (urlWithoutParams === 'insomnia://app/auth/finish') {
-        return authorizeSubmit({
-          code: params.box,
-        });
-      }
       if (urlWithoutParams === 'insomnia://app/open/organization') {
         // if user is logged out, navigate to authorize instead
         // gracefully handle open org in app from browser
@@ -430,7 +423,7 @@ const Root = () => {
           const url = new URL(getLoginUrl());
           window.main.openInBrowser(url.toString());
           window.localStorage.setItem('specificOrgRedirectAfterAuthorize', params.organizationId);
-          return navigate(href('/auth/authorize'));
+          return navigate(href('/auth/login'));
         }
         return navigate(`/organization/${params.organizationId}`);
       }
@@ -520,7 +513,6 @@ const Root = () => {
       console.log(`Unknown deep link: ${url}`);
     });
   }, [
-    authorizeSubmit,
     createCloudCredentials,
     gitLabCompleteSignInSubmit,
     githubCompleteSignInSubmit,

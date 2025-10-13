@@ -19,7 +19,7 @@ export async function clientLoader({ params }: Route.ClientLoaderArgs) {
 
 export async function clientAction({ params }: Route.ClientActionArgs) {
   const { organizationId } = params;
-  await fetchAndCacheOrganizationStorageRule(organizationId, true);
+  await fetchAndCacheOrganizationStorageRule(organizationId);
   return null;
 }
 

@@ -91,7 +91,8 @@ export type HandleChannels =
   | 'webSocket.event.send'
   | 'webSocket.open'
   | 'webSocket.readyState'
-  | 'writeFile';
+  | 'writeFile'
+  | 'login';
 
 export const ipcMainHandle = (
   channel: HandleChannels,

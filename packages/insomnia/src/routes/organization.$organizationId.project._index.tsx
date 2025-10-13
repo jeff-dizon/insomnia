@@ -78,9 +78,9 @@ import { ProjectEmptyView } from '~/ui/components/project/project-empty-view';
 import { OrganizationTabList } from '~/ui/components/tabs/tab-list';
 import { TimeFromNow } from '~/ui/components/time-from-now';
 import { useInsomniaEventStreamContext } from '~/ui/context/app/insomnia-event-stream-context';
+import { customFetch } from '~/ui/customFetch';
 import { useLoaderDeferData } from '~/ui/hooks/use-loader-defer-data';
 import { useOrganizationPermissions } from '~/ui/hooks/use-organization-features';
-import { customFetch } from '~/ui/customFetch';
 import { DEFAULT_STORAGE_RULES } from '~/ui/organization-utils';
 import { invariant } from '~/utils/invariant';
 
@@ -394,7 +394,7 @@ async function getProjectsWithGitRepositories({
 export async function clientLoader({ params }: LoaderFunctionArgs) {
   const { organizationId, projectId } = params;
   invariant(organizationId, 'Organization ID is required');
-  const { id: sessionId } = await userSession.getOrCreate();
+  const { accountId } = await userSession.getOrCreate();
   const fallbackLearningFeature = {
     active: false,
     title: '',
@@ -416,7 +416,7 @@ export async function clientLoader({ params }: LoaderFunctionArgs) {
     };
   }
 
-  if (!sessionId) {
+  if (!accountId) {
     await logout();
     throw redirect(href('/auth/login'));
   }

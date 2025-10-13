@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
+import type { AuthenticationResult } from '@azure/msal-node';
 import type { ISpectralDiagnostic } from '@stoplight/spectral-core';
 import chardet from 'chardet';
 import type { MarkerRange } from 'codemirror';
@@ -14,6 +15,9 @@ import {
 } from 'electron';
 import type { UtilityProcess } from 'electron/main';
 import iconv from 'iconv-lite';
+
+import { AADConfig } from '~/common/constants';
+import AuthProvider from '~/main/ipc/authProvider';
 
 import type { HiddenBrowserWindowBridgeAPI } from '../../entry.hidden-window';
 import * as models from '../../models';
@@ -104,9 +108,12 @@ export interface RendererToMainBridgeAPI {
   updateLatestStepName: (options: { requestId: string; stepName: string }) => void;
   extractJsonFileFromPostmanDataDumpArchive: (archivePath: string) => Promise<any>;
   getLocalStorageDataFromFileOrigin: () => Promise<Record<string, any>>;
+  login: () => Promise<AuthenticationResult | null>;
 }
 
 export function registerMainHandlers() {
+  const authProvider = new AuthProvider(AADConfig);
+
   ipcMainOn('addExecutionStep', (_, options: { requestId: string; stepName: string }) => {
     addExecutionStep(options.requestId, options.stepName);
   });
@@ -270,6 +277,16 @@ export function registerMainHandlers() {
     const { protocol } = new URL(href);
     if (protocol === 'http:' || protocol === 'https:') {
       shell.openExternal(href);
+    }
+  });
+
+  ipcMainHandle('login', async () => {
+    try {
+      const account = await authProvider.login();
+      return account;
+    } catch (error) {
+      console.error(error);
+      return null;
     }
   });
 

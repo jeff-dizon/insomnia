@@ -5,10 +5,10 @@ import { createFetcherSubmitHook } from '~/utils/router';
 import type { Route } from './+types/organization.sync';
 
 export async function clientAction(_args: Route.ClientActionArgs) {
-  const { id: sessionId, accountId } = await userSession.getOrCreate();
+  const { id: sessionId } = await userSession.getOrCreate();
 
   if (sessionId) {
-    await syncOrganizations(sessionId, accountId);
+    await syncOrganizations(sessionId);
   }
 
   return null;

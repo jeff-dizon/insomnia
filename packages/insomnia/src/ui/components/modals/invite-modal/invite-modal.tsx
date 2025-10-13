@@ -678,7 +678,7 @@ export interface Features {
   features: OrgFeatures;
 }
 
-async function getOrganizationFeatures(organizationId: string): Promise<Features> {
+async function getOrganizationFeatures(_organizationId: string): Promise<Features> {
   return {
     features: {
       cloudSync: {

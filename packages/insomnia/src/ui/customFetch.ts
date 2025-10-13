@@ -4,7 +4,7 @@ import { generateId } from '../common/misc';
 interface FetchConfig {
   method: 'POST' | 'PUT' | 'GET' | 'DELETE' | 'PATCH';
   path: string;
-  sessionId: string | null;
+  sessionId?: string | null;
   organizationId?: string | null;
   data?: unknown;
   retries?: number;
@@ -35,6 +35,8 @@ export async function customFetch<T = void>({
   onlyResolveOnSuccess = false,
   timeout = INSOMNIA_FETCH_TIME_OUT,
 }: FetchConfig): Promise<T> {
+  const account = await window.main.login();
+
   const config: RequestInit = {
     method,
     headers: {
@@ -42,6 +44,7 @@ export async function customFetch<T = void>({
       'X-Insomnia-Client': getClientString(),
       'insomnia-request-id': generateId('desk'),
       'X-Origin': origin || getApiBaseURL(),
+      'Authorization': account ? `Bearer ${account.accessToken}` : '',
       ...(sessionId ? { 'X-Session-Id': sessionId } : {}),
       ...(data ? { 'Content-Type': 'application/json' } : {}),
       ...(organizationId ? { 'X-Insomnia-Org-Id': organizationId } : {}),
@@ -50,9 +53,6 @@ export async function customFetch<T = void>({
     ...(data ? { body: JSON.stringify(data) } : {}),
     signal: AbortSignal.timeout(timeout),
   };
-  if (sessionId === undefined) {
-    throw new Error(`No session ID provided to ${method}:${path}`);
-  }
 
   try {
     const response = await fetch((origin || getApiBaseURL()) + path, config);
@@ -73,7 +73,9 @@ export async function customFetch<T = void>({
       }
       throw new ResponseFailError(errMsg, response);
     }
-    return isJson ? response.json() : (response.text() as Promise<T>);
+    const responseBody = await (isJson ? response.json() : (response.text() as Promise<T>));
+
+    return responseBody;
   } catch (err) {
     if (err.name === 'AbortError') {
       throw new Error('custom fetch timed out');

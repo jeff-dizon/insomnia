@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Button, Link, Tooltip, TooltipTrigger } from 'react-aria-components';
+import { Button, Tooltip, TooltipTrigger } from 'react-aria-components';
 import { Outlet } from 'react-router';
 
 import { useRootLoaderData } from '~/root';

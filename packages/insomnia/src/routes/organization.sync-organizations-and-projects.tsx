@@ -30,7 +30,7 @@ export async function clientAction({ request }: Route.ClientActionArgs) {
     if (asyncTaskList.includes(AsyncTask.SyncOrganization)) {
       invariant(sessionId, 'sessionId is required');
       invariant(accountId, 'accountId is required');
-      taskPromiseList.push(syncOrganizations(sessionId, accountId));
+      taskPromiseList.push(syncOrganizations(sessionId));
     }
 
     if (asyncTaskList.includes(AsyncTask.MigrateProjects)) {

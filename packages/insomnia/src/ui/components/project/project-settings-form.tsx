@@ -78,7 +78,6 @@ interface Props {
 
 export const ProjectSettingsForm: FC<Props> = ({
   storageRules,
-  isGitSyncEnabled,
   project,
   gitRepository,
   defaultProjectName = 'My Project',

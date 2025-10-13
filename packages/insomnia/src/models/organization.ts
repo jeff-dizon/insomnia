@@ -45,11 +45,6 @@ export interface UserProfileResponse {
   email: string;
   name: string;
   picture: string;
-  bio: string;
-  github: string;
-  linkedin: string;
-  twitter: string;
-  identities: any;
   given_name: string;
   family_name: string;
 }

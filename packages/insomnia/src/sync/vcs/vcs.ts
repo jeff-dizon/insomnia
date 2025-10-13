@@ -6,7 +6,6 @@ import path from 'node:path';
 
 import clone from 'clone';
 
-import * as crypt from '../../account/crypt';
 import * as session from '../../account/session';
 import { getCurrentSessionId } from '../../account/session';
 import type { Operation } from '../../common/database';

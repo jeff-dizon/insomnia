@@ -113,14 +113,6 @@ export const HeaderUserButton = ({ user, currentPlan, isMinimal = false }: UserB
             <span>Manage Organizations</span>
           </MenuItem>
           <MenuItem
-            id="account-settings"
-            className="text-md flex h-[--line-height-xs] w-full items-center gap-2 whitespace-nowrap bg-transparent px-[--padding-md] text-[--color-font] transition-colors hover:bg-[--hl-sm] focus:bg-[--hl-xs] focus:outline-none disabled:cursor-not-allowed aria-selected:font-bold"
-            aria-label="Account settings"
-          >
-            <Icon icon="gear" />
-            <span>Account Settings</span>
-          </MenuItem>
-          <MenuItem
             id="logout"
             className="text-md flex h-[--line-height-xs] w-full items-center gap-2 whitespace-nowrap bg-transparent px-[--padding-md] text-[--color-font] transition-colors hover:bg-[--hl-sm] focus:bg-[--hl-xs] focus:outline-none disabled:cursor-not-allowed aria-selected:font-bold"
             aria-label="logout"

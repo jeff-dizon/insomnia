@@ -17,11 +17,8 @@ import {
   migrateProjectsIntoOrganization,
   shouldMigrateProjectUnderOrganization,
 } from '../sync/vcs/migrate-projects-into-organization';
-import { customFetch } from './customFetch';
 import { invariant } from '../utils/invariant';
-
-// Create an in-memory storage to store the storage rules
-const inMemoryStorageRuleCache: Map<string, StorageRules> = new Map<string, StorageRules>();
+import { customFetch } from './customFetch';
 
 export function sortOrganizations(accountId: string, organizations: Organization[]): Organization[] {
   const home = organizations.find(
@@ -54,18 +51,16 @@ export function sortOrganizations(accountId: string, organizations: Organization
   return [...(home ? [home] : []), ...myOrgs, ...notMyOrgs];
 }
 
-export async function syncOrganizations(sessionId: string, accountId: string) {
+export async function syncOrganizations(accountId: string) {
   try {
     const [organizationsResult, user] = await Promise.all([
       customFetch<OrganizationsResponse | void>({
         method: 'GET',
         path: '/v1/organizations',
-        sessionId,
       }),
       customFetch<UserProfileResponse | void>({
         method: 'GET',
         path: '/v1/user/profile',
-        sessionId,
       }),
     ]);
 
@@ -82,7 +77,6 @@ export async function syncOrganizations(sessionId: string, accountId: string) {
     invariant(organizationsResult, 'Failed to load organizations');
     invariant(user && user.id, 'Failed to load user');
     invariant(currentPlan && currentPlan.planId, 'Failed to load current plan');
-
     invariant(accountId, 'Account ID is not defined');
 
     localStorage.setItem(
@@ -129,10 +123,7 @@ export const DEFAULT_STORAGE_RULES = {
   isOverridden: false,
 };
 
-export async function fetchAndCacheOrganizationStorageRule(
-  organizationId: string | undefined,
-  forceFetch = false,
-): Promise<StorageRules> {
+export async function fetchAndCacheOrganizationStorageRule(organizationId: string | undefined): Promise<StorageRules> {
   invariant(organizationId, 'Organization ID is required');
 
   if (isScratchpadOrganizationId(organizationId)) {
@@ -167,7 +158,6 @@ async function getAllTeamProjects(organizationId: string) {
   const response = await customFetch<TeamProject[]>({
     path: `/v1/organizations/${organizationId}/team-projects`,
     method: 'GET',
-    sessionId,
   });
 
   return response;
