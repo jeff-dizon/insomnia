@@ -23,64 +23,63 @@ export class ResponseFailError extends Error {
   name = 'ResponseFailError';
 }
 
-// Adds headers, retries and opens deep links returned from the api
-export async function customFetch<T = void>({
-  method,
-  path,
-  data,
-  sessionId,
-  organizationId,
-  origin,
-  headers,
-  onlyResolveOnSuccess = false,
-  timeout = INSOMNIA_FETCH_TIME_OUT,
-}: FetchConfig): Promise<T> {
-  const account = await window.main.login();
+let loginPromise: Promise<any> | null = null;
 
-  const config: RequestInit = {
-    method,
+export async function customFetch<T = void>(config: FetchConfig): Promise<T> {
+  // Only trigger login once
+  if (!loginPromise) {
+    loginPromise = window.main.login();
+  }
+
+  let account;
+  try {
+    account = await loginPromise;
+  } finally {
+    // Reset the promise if login failed or succeeded
+    loginPromise = null;
+  }
+
+  const fetchConfig: RequestInit = {
+    method: config.method,
     headers: {
-      ...headers,
+      ...config.headers,
       'X-Insomnia-Client': getClientString(),
       'insomnia-request-id': generateId('desk'),
-      'X-Origin': origin || getApiBaseURL(),
+      'X-Origin': config.origin || getApiBaseURL(),
       'Authorization': account ? `Bearer ${account.accessToken}` : '',
-      ...(sessionId ? { 'X-Session-Id': sessionId } : {}),
-      ...(data ? { 'Content-Type': 'application/json' } : {}),
-      ...(organizationId ? { 'X-Insomnia-Org-Id': organizationId } : {}),
+      ...(config.sessionId ? { 'X-Session-Id': config.sessionId } : {}),
+      ...(config.data ? { 'Content-Type': 'application/json' } : {}),
+      ...(config.organizationId ? { 'X-Insomnia-Org-Id': config.organizationId } : {}),
       ...(PLAYWRIGHT ? { 'X-Mockbin-Test': 'true' } : {}),
     },
-    ...(data ? { body: JSON.stringify(data) } : {}),
-    signal: AbortSignal.timeout(timeout),
+    ...(config.data ? { body: JSON.stringify(config.data) } : {}),
+    signal: AbortSignal.timeout(config.timeout || INSOMNIA_FETCH_TIME_OUT),
   };
 
   try {
-    const response = await fetch((origin || getApiBaseURL()) + path, config);
+    const response = await fetch((config.origin || getApiBaseURL()) + config.path, fetchConfig);
+
     const uri = response.headers.get('x-insomnia-command');
     if (uri) {
       window.main.openDeepLink(uri);
     }
-    const isJson = response.headers.get('content-type')?.includes('application/json') || path.match(/\.json$/);
-    if (onlyResolveOnSuccess && !response.ok) {
+
+    const isJson = response.headers.get('content-type')?.includes('application/json') || config.path.match(/\.json$/);
+
+    if (config.onlyResolveOnSuccess && !response.ok) {
       let errMsg = '';
       if (isJson) {
         try {
           const json = await response.json();
-          if (typeof json?.message === 'string') {
-            errMsg = json.message;
-          }
-        } catch (err) {}
+          if (typeof json?.message === 'string') errMsg = json.message;
+        } catch {}
       }
       throw new ResponseFailError(errMsg, response);
     }
-    const responseBody = await (isJson ? response.json() : (response.text() as Promise<T>));
 
-    return responseBody;
+    return await (isJson ? response.json() : (response.text() as Promise<T>));
   } catch (err) {
-    if (err.name === 'AbortError') {
-      throw new Error('custom fetch timed out');
-    } else {
-      throw err;
-    }
+    if (err.name === 'AbortError') throw new Error('custom fetch timed out');
+    throw err;
   }
 }
