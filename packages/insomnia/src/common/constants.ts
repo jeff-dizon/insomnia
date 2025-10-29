@@ -149,7 +149,8 @@ export const AADConfig = {
   scopes: ['api://5e31f0d0-0072-4c13-977e-8c9ec2dd8869/access_as_user', 'User.Read', 'User.ReadBasic.All'],
 };
 
-export const getApiBaseURL = () => 'https://localhost:7195/api';
+export const getApiBaseURL = () =>
+  'https://pss-prod-env-amber-insomnia-app-afc8ckedgkbdgefj.centralus-01.azurewebsites.net/api';
 export const getMockServiceURL = () => env.INSOMNIA_MOCK_API_URL || 'https://mock.insomnia.run';
 
 export const getMockServiceBinURL = (mockServer: MockServer, path: string) => {

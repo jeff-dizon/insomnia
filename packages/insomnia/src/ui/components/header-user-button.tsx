@@ -82,12 +82,6 @@ export const HeaderUserButton = ({ user, currentPlan, isMinimal = false }: UserB
         <Icon className="w-4 pr-2" icon={isMinimal ? 'caret-up' : 'caret-down'} />
       </Button>
       <Popover className="max-h-[85vh] min-w-max select-none overflow-y-auto rounded-md border border-solid border-[--hl-sm] bg-[--color-bg] py-2 text-sm shadow-lg focus:outline-none">
-        {currentPlan && Boolean(currentPlan.type) && (
-          <div className="text-md flex h-[--line-height-xs] w-full items-center justify-between gap-2 whitespace-nowrap border-b border-solid border-[--hl-sm] px-[--padding-md] pb-2 capitalize text-[--color-font]">
-            <span>{currentPlan?.planName ?? formatCurrentPlanType(currentPlan.type)} Plan</span>
-            <UpgradeButton currentPlan={currentPlan} />
-          </div>
-        )}
         <Menu
           className="focus:outline-none"
           onAction={action => {
