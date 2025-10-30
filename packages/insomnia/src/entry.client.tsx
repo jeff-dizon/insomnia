@@ -1,5 +1,5 @@
-import './ui/rendererListeners';
 import './ui/log';
+import './ui/rendererListeners';
 
 import { startTransition, StrictMode } from 'react';
 import { hydrateRoot } from 'react-dom/client';
@@ -17,10 +17,9 @@ import { showModal } from './ui/components/modals';
 import { AlertModal } from './ui/components/modals/alert-modal';
 import { PromptModal } from './ui/components/modals/prompt-modal';
 import { WrapperModal } from './ui/components/modals/wrapper-modal';
-import { initializeSentry } from './ui/sentry';
 import { getInitialEntry } from './utils/router';
 
-initializeSentry();
+// initializeSentry();
 
 await initPlugins();
 

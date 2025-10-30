@@ -4,7 +4,7 @@
     StrCpy $1 "$PROFILE\AppData\Local\insomnia\.dead"
     IfFileExists $1 skip_uninstall
     IfFileExists $0 0 skip_uninstall
-    MessageBox MB_YESNO "Existing Insomnia installation found, which must be uninstalled first.$\n$\nClick 'No' to exit this installer so you can uninstall yourself.$\n$\nClick 'Yes' to allow this installer to uninstall for you (your existing Insomnia data will be preserved)." IDYES do_uninstall IDNO exit_installer
+    MessageBox MB_YESNO "Existing Emerson Manila API Studio installation found, which must be uninstalled first.$\n$\nClick 'No' to exit this installer so you can uninstall yourself.$\n$\nClick 'Yes' to allow this installer to uninstall for you (your existing Emerson Manila API Studio data will be preserved)." IDYES do_uninstall IDNO exit_installer
     do_uninstall:
       nsExec::Exec '"$0" --uninstall -s'
       Goto skip_uninstall

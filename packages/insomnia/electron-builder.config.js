@@ -1,4 +1,4 @@
-const BINARY_PREFIX = 'Insomnia.Core';
+const BINARY_PREFIX = 'EmersonManilaAPIStudio.Core';
 // NOTE: USE_HARD_LINKS
 // https://github.com/electron-userland/electron-builder/issues/4594#issuecomment-574653870
 
@@ -8,12 +8,12 @@ const BINARY_PREFIX = 'Insomnia.Core';
  */
 const config = {
   npmRebuild: false,
-  appId: 'com.insomnia.app',
+  appId: 'com.emerson-manila-api-studio.app',
   protocols: [
     {
-      name: 'Insomnia',
+      name: 'Emerson Manila API Studio',
       role: 'Viewer',
-      schemes: ['insomnia'],
+      schemes: ['emerson-manila-api-studio'],
     },
   ],
   files: [
@@ -110,7 +110,7 @@ const config = {
     uninstallerIcon: './build/icon.ico',
     createDesktopShortcut: true,
     createStartMenuShortcut: true,
-    shortcutName: 'Insomnia',
+    shortcutName: 'Emerson Manila API Studio',
     deleteAppDataOnUninstall: false,
   },
   squirrelWindows: {
@@ -121,15 +121,14 @@ const config = {
     artifactName: `${BINARY_PREFIX}-\${version}-portable.\${ext}`,
   },
   linux: {
-    // artifactName: `${BINARY_PREFIX}-\${version}-\${arch}.\${ext}`, // TODO-ARM64 - Re-enable when we have ARM64 build from insomnia-ee
     artifactName: `${BINARY_PREFIX}-\${version}.\${ext}`,
     executableName: 'insomnia',
     synopsis: 'The Collaborative API Client and Design Tool',
     category: 'Development',
     desktop: {
       entry: {
-        Name: 'Insomnia',
-        Comment: 'Insomnia is a cross-platform REST client, built on top of Electron.',
+        Name: 'Emerson Manila API Studio',
+        Comment: 'Emerson Manila API Studio is a cross-platform REST client, built on top of Insomnia.',
         Categories: 'Development',
         Keywords: 'GraphQL;REST;gRPC;SOAP;openAPI;GitOps;',
       },

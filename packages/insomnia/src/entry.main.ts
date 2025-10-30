@@ -2,8 +2,7 @@ import fs from 'node:fs/promises';
 import inspector from 'node:inspector';
 import path from 'node:path';
 
-import electron, { app, session } from 'electron';
-import { BrowserWindow } from 'electron';
+import electron, { app, BrowserWindow, session } from 'electron';
 import contextMenu from 'electron-context-menu';
 import installExtension, { REACT_DEVELOPER_TOOLS } from 'electron-devtools-installer';
 
@@ -23,7 +22,7 @@ import { registerCurlHandlers } from './main/network/curl';
 import { registerSocketIOHandlers } from './main/network/socket-io';
 import { registerWebSocketHandlers } from './main/network/websocket';
 import { watchProxySettings } from './main/proxy';
-import { initializeSentry, sentryWatchAnalyticsEnabled } from './main/sentry';
+import { sentryWatchAnalyticsEnabled } from './main/sentry';
 import { checkIfRestartNeeded } from './main/squirrel-startup';
 import * as updates from './main/updates';
 import * as windowUtils from './main/window-utils';
@@ -42,7 +41,7 @@ app.setPath('userData', dataPath);
 
 initializeLogging();
 
-initializeSentry();
+// initializeSentry();
 
 registerInsomniaProtocols();
 

@@ -380,66 +380,6 @@ const Component = ({ loaderData }: Route.ComponentProps) => {
                       </TooltipTrigger>
                     );
                   })}
-                  <MenuTrigger>
-                    <Button className="box-border flex h-[28px] w-[28px] select-none items-center justify-center overflow-hidden rounded-md p-[--padding-sm] font-bold text-[--color-font] outline-none transition-all duration-150 hover:no-underline">
-                      <Icon icon="plus" />
-                    </Button>
-                    <Popover placement="left" className="min-w-max">
-                      <Menu
-                        onAction={action => {
-                          if (action === 'join-organization') {
-                            window.main.openInBrowser(getLoginUrl());
-                          }
-
-                          if (action === 'new-organization') {
-                            // If user is in the scratchpad workspace redirect them to the login page
-                            if (isScratchpadWorkspace) {
-                              window.main.openInBrowser(getLoginUrl());
-                            }
-
-                            if (!currentPlan) {
-                              return;
-                            }
-
-                            if (currentPlan.type === 'enterprise-member') {
-                              // If user has a team or enterprise member plan show them an alert
-                              showModal(AlertModal, {
-                                title: 'Cannot create new organization.',
-                                message:
-                                  'Your Insomnia account is tied to the enterprise corporate account. Please ask the owner of the enterprise billing to create one for you.',
-                              });
-                            } else if (['free', 'individual'].includes(currentPlan.type)) {
-                              // If user has a free or individual plan redirect them to the landing page
-                              window.main.openInBrowser(`${getAppWebsiteBaseURL()}/app/landing-page`);
-                            } else {
-                              // If user has a team or enterprise plan redirect them to the create organization page
-                              window.main.openInBrowser(
-                                `${getAppWebsiteBaseURL()}/app/dashboard/organizations?create_org=true`,
-                              );
-                            }
-                          }
-                        }}
-                        className="max-h-[85vh] min-w-max select-none overflow-y-auto rounded-md border border-solid border-[--hl-sm] bg-[--color-bg] py-2 text-sm shadow-lg focus:outline-none"
-                      >
-                        <MenuItem
-                          id="join-organization"
-                          className="text-md flex h-[--line-height-xs] w-full items-center gap-2 whitespace-nowrap bg-transparent px-[--padding-md] text-[--color-font] transition-colors hover:bg-[--hl-sm] focus:bg-[--hl-xs] focus:outline-none disabled:cursor-not-allowed aria-selected:font-bold"
-                          aria-label="Join an organization"
-                        >
-                          <Icon icon="city" />
-                          <span>Join an organization</span>
-                        </MenuItem>
-                        <MenuItem
-                          id="new-organization"
-                          className="text-md flex h-[--line-height-xs] w-full items-center gap-2 whitespace-nowrap bg-transparent px-[--padding-md] text-[--color-font] transition-colors hover:bg-[--hl-sm] focus:bg-[--hl-xs] focus:outline-none disabled:cursor-not-allowed aria-selected:font-bold"
-                          aria-label="Create new organization"
-                        >
-                          <Icon icon="sign-out" />
-                          <span>Create a new organization</span>
-                        </MenuItem>
-                      </Menu>
-                    </Popover>
-                  </MenuTrigger>
                 </nav>
               </div>
             )}
