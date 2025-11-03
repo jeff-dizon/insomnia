@@ -1,38 +1,28 @@
-import React, { Fragment, useCallback, useEffect, useState } from 'react';
-import {
-  Button,
-  Link,
-  Menu,
-  MenuItem,
-  MenuTrigger,
-  Popover,
-  ToggleButton,
-  Tooltip,
-  TooltipTrigger,
-} from 'react-aria-components';
+import { Fragment, useCallback, useEffect, useState } from 'react';
+import { Button, Link, ToggleButton, Tooltip, TooltipTrigger } from 'react-aria-components';
 import { href, NavLink, Outlet, useLocation, useNavigate, useParams, useRouteLoaderData } from 'react-router';
 import * as reactUse from 'react-use';
 
-import { getAppWebsiteBaseURL } from '~/common/constants';
 import { userSession } from '~/models';
-import { isOwnerOfOrganization, isPersonalOrganization, type Organization } from '~/models/organization';
-import { type CurrentPlan, type UserProfileResponse } from '~/models/organization';
+import {
+  type CurrentPlan,
+  isOwnerOfOrganization,
+  isPersonalOrganization,
+  type Organization,
+  type UserProfileResponse,
+} from '~/models/organization';
 import type { Settings } from '~/models/settings';
 import { isScratchpad } from '~/models/workspace';
 import { useRootLoaderData } from '~/root';
 import { useWorkspaceLoaderData } from '~/routes/organization.$organizationId.project.$projectId.workspace.$workspaceId';
 import { useSyncOrganizationsAndProjectsActionFetcher } from '~/routes/organization.sync-organizations-and-projects';
 import { useUntrackedProjectsLoaderFetcher } from '~/routes/untracked-projects';
-import { getLoginUrl } from '~/ui/auth-session-provider.client';
 import { CommandPalette } from '~/ui/components/command-palette';
-import { GitHubStarsButton } from '~/ui/components/github-stars-button';
-import { HeaderInviteButton } from '~/ui/components/header-invite-button';
 import { HeaderUserButton } from '~/ui/components/header-user-button';
 import { Hotkey } from '~/ui/components/hotkey';
 import { Icon } from '~/ui/components/icon';
 import { InsomniaLogo } from '~/ui/components/insomnia-icon';
 import { showModal } from '~/ui/components/modals';
-import { AlertModal } from '~/ui/components/modals/alert-modal';
 import { SettingsModal, showSettingsModal } from '~/ui/components/modals/settings-modal';
 import { OrganizationAvatar } from '~/ui/components/organization-avatar';
 import { PresentUsers } from '~/ui/components/present-users';
@@ -272,7 +262,6 @@ const Component = ({ loaderData }: Route.ComponentProps) => {
                   {user ? (
                     <Fragment>
                       <PresentUsers />
-                      <HeaderInviteButton className="border border-solid border-[--hl-md] bg-[rgba(var(--color-surprise-rgb),var(--tw-bg-opacity))] bg-opacity-100 font-semibold text-[--color-font-surprise]" />
                       <HeaderUserButton user={user} currentPlan={currentPlan} isMinimal={isMinimal} />
                     </Fragment>
                   ) : (
@@ -540,7 +529,6 @@ const Component = ({ loaderData }: Route.ComponentProps) => {
                       {user ? (
                         <Fragment>
                           <PresentUsers />
-                          <HeaderInviteButton className="text-[--color-font]" />
                           <HeaderUserButton user={user} currentPlan={currentPlan} isMinimal={isMinimal} />
                         </Fragment>
                       ) : (
