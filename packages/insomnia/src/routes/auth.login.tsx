@@ -51,8 +51,16 @@ const Component = () => {
   const loginFetcher = useLoginActionFetcher();
   const navigate = useNavigate();
   const [message, setMessage] = useState<string | null>(null);
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+
+  useEffect(() => {
+    if (loginFetcher.state === 'idle' && loginFetcher.data) {
+      setIsLoggingIn(false);
+    }
+  }, [loginFetcher.state, loginFetcher.data]);
 
   const login = async () => {
+    setIsLoggingIn(true);
     loginFetcher.submit();
   };
 
@@ -83,6 +91,7 @@ const Component = () => {
         {message && <div className="text-sm font-bold text-red-300">{message}</div>}
 
         <Button
+          isDisabled={isLoggingIn}
           aria-label="Continue with SSO"
           onPress={() => {
             login();
@@ -92,7 +101,9 @@ const Component = () => {
           <div className="flex h-[35px] w-[40px] items-center justify-center border-r border-solid border-[--hl-sm] bg-[--hl-xs]">
             <Icon icon="key" />
           </div>
-          <span className="items flex-1">Continue with SSO</span>
+          <span className="items align-center flex flex-1 justify-between">
+            Continue with SSO {isLoggingIn && <Icon icon="spinner" className="mr-2 mt-1 animate-spin" />}
+          </span>
         </Button>
       </div>
 
