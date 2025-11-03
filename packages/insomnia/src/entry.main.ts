@@ -2,7 +2,8 @@ import fs from 'node:fs/promises';
 import inspector from 'node:inspector';
 import path from 'node:path';
 
-import electron, { app, BrowserWindow, session } from 'electron';
+import type { BrowserWindow } from 'electron';
+import electron, { app, session } from 'electron';
 import contextMenu from 'electron-context-menu';
 import installExtension, { REACT_DEVELOPER_TOOLS } from 'electron-devtools-installer';
 
@@ -29,14 +30,11 @@ import * as windowUtils from './main/window-utils';
 import * as models from './models/index';
 import type { Project, RemoteProject } from './models/project';
 import type { Stats } from './models/stats';
-import type { ToastNotification } from './ui/components/toast';
 
 // Override the Electron userData path
 // This makes Chromium use this folder for eg localStorage
 // ensure userData dir change is made before configure sentry SDK (https://docs.sentry.io/platforms/javascript/guides/electron/#app-userdata-directory)
-const dataPath =
-  process.env.INSOMNIA_DATA_PATH ||
-  path.join(app.getPath('userData'), '../', isDevelopment() ? 'insomnia-app' : userDataFolder);
+const dataPath = process.env.INSOMNIA_DATA_PATH || path.join(app.getPath('userData'), '../', userDataFolder);
 app.setPath('userData', dataPath);
 
 initializeLogging();
@@ -319,30 +317,6 @@ async function _trackStats() {
     createdRequests: stats.createdRequests,
     deletedRequests: stats.deletedRequests,
     executedRequests: stats.executedRequests,
-  });
-
-  ipcMainOnce('halfSecondAfterAppStart', async () => {
-    const { currentVersion, launches, lastVersion } = stats;
-
-    const firstLaunch = launches === 1;
-    const justUpdated = !firstLaunch && currentVersion !== lastVersion;
-    if (!justUpdated || !currentVersion) {
-      return;
-    }
-    console.log('[main] App update detected', currentVersion, lastVersion);
-    const notification: ToastNotification = {
-      key: `updated-${currentVersion}`,
-      url: 'https://insomnia.rest/changelog',
-      cta: "See What's New",
-      message: `Updated to ${currentVersion}`,
-    };
-    // Wait a bit before showing the user because the app just launched.
-    setTimeout(async () => {
-      for (const window of BrowserWindow.getAllWindows()) {
-        // @ts-expect-error -- TSCONVERSION likely needs to be window.webContents.send instead
-        window.send('show-notification', notification);
-      }
-    }, 5000);
   });
   return stats;
 }

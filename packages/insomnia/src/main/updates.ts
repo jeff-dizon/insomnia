@@ -22,23 +22,26 @@ export type UpdateStatus =
   | 'Check Now';
 
 export const isUpdateSupported = () => {
-  if (process.platform === 'linux') {
-    console.log('[updater] Not supported on this platform', process.platform);
-    return false;
-  }
-  if (process.platform === 'win32' && process.env['PORTABLE_EXECUTABLE_DIR']) {
-    console.log('[updater] Not supported on portable windows binary');
-    return false;
-  }
-  if (process.env.INSOMNIA_DISABLE_AUTOMATIC_UPDATES) {
-    console.log('[updater] Disabled by INSOMNIA_DISABLE_AUTOMATIC_UPDATES environment variable');
-    return false;
-  }
-  if (isDevelopment()) {
-    console.log('[updater] Disabled in dev mode');
-    return false;
-  }
-  return true;
+  // TO DO: re-enable auto updates
+  return false;
+
+  // if (process.platform === 'linux') {
+  //   console.log('[updater] Not supported on this platform', process.platform);
+  //   return false;
+  // }
+  // if (process.platform === 'win32' && process.env['PORTABLE_EXECUTABLE_DIR']) {
+  //   console.log('[updater] Not supported on portable windows binary');
+  //   return false;
+  // }
+  // if (process.env.INSOMNIA_DISABLE_AUTOMATIC_UPDATES) {
+  //   console.log('[updater] Disabled by INSOMNIA_DISABLE_AUTOMATIC_UPDATES environment variable');
+  //   return false;
+  // }
+  // if (isDevelopment()) {
+  //   console.log('[updater] Disabled in dev mode');
+  //   return false;
+  // }
+  // return true;
 };
 const getUpdateUrl = (updateChannel: string): string | null => {
   invariant(isUpdateSupported(), 'auto update is not supported');

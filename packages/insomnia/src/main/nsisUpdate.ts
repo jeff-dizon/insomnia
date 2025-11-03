@@ -73,7 +73,6 @@ const _checkForUpdates = async () => {
   try {
     console.log(`[NSIS updater] Checking for updates`);
     const settings = await models.settings.get();
-    // set auto-update channel
     autoUpdater.channel = settings.updateChannel;
     autoUpdater.checkForUpdates();
   } catch (err) {
